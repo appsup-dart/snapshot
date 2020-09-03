@@ -215,6 +215,10 @@ class _SnapshotImpl extends Snapshot {
 
   @override
   Snapshot set(value) {
+    if (value is Snapshot) {
+      // TODO recycle cache
+    }
+    value = value is Snapshot ? value.as() : value;
     var isEqual = DeepCollectionEquality().equals(_value, value);
     if (isEqual) return this;
 

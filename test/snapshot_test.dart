@@ -171,6 +171,15 @@ void main() {
         expect(v.child('firstname').as(), 'John');
         expect(lastname, same(v.child('lastname')));
       });
+
+      test('Setting with snapshot value should extract content', () {
+        v = v.set(Snapshot.fromJson({
+          'firstname': 'John',
+          'lastname': 'Doe',
+        }));
+
+        expect(v.child('firstname').as(), 'John');
+      });
     });
 
     group('Snapshot.setPath()', () {
@@ -193,6 +202,12 @@ void main() {
 
         expect(v.child('address/city').as(), 'New York');
         expect(firstname, same(v.child('lastname')));
+      });
+
+      test('Setting with snapshot value should extract content', () {
+        v = v.setPath('address', Snapshot.fromJson({'city': 'New York'}));
+
+        expect(v.child('address/city').as(), 'New York');
       });
     });
 
