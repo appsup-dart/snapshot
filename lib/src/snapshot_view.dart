@@ -111,7 +111,13 @@ class ModifiableSnapshotView with SnapshotView {
 /// This extension makes setters available to update the content of the snapshot
 extension ModifiableSnapshotViewExtension on ModifiableSnapshotView {
   /// Updates the content at [path] with [value]
+  ///
+  /// When [path] is null, will set the root snapshot
   void set(String path, dynamic value) {
-    _snapshot = _snapshot.setPath(path, value);
+    if (path == null) {
+      _snapshot = _snapshot.set(value);
+    } else {
+      _snapshot = _snapshot.setPath(path, value);
+    }
   }
 }
