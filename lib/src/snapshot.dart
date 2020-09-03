@@ -223,8 +223,19 @@ class _SnapshotImpl extends Snapshot {
     if (isEqual) return this;
 
     var v = _SnapshotImpl(value, decoder: _decoder);
-    v._childrenCache.addAll(_childrenCache
-        .map((k, v) => MapEntry(k, v.set(value is Map ? value[k] : null))));
+
+    if (value is Map && _value is Map) {
+      _childrenCache.forEach((k, child) {
+        if (value[k] == null) return;
+        v._childrenCache[k] = child.set(value[k]);
+      });
+    } else if (value is List && _value is List) {
+      _childrenCache.forEach((k, child) {
+        var index = int.parse(k);
+        if (index >= value.length) return;
+        v._childrenCache[k] = child.set(value[index]);
+      });
+    }
     return v;
   }
 }

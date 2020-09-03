@@ -119,6 +119,14 @@ void main() {
         v = Snapshot.fromJson(['https://google.com']);
         expect(v.asList<Uri>()[0], same(v.child('0').as<Uri>()));
       });
+      test('Should update cache correctly', () {
+        var v = Snapshot.fromJson(['1', '2', '3', '4']);
+        // this will create cache entries for all items in the list
+        v.asList<int>(format: 'string');
+
+        // this should update the first two elements in cache and remove the other two
+        v.set(['5', '6']);
+      });
     });
 
     group('Snapshot.asMap()', () {
