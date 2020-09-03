@@ -162,14 +162,14 @@ void main() {
       });
 
       test('Unmodified children should be recycled', () {
-        var firstname = v.child('lastname');
+        var lastname = v.child('lastname');
         v = v.set({
           'firstname': 'John',
           'lastname': 'Doe',
         });
 
         expect(v.child('firstname').as(), 'John');
-        expect(firstname, same(v.child('lastname')));
+        expect(lastname, same(v.child('lastname')));
       });
     });
 
