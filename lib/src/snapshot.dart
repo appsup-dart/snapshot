@@ -134,6 +134,18 @@ abstract class Snapshot implements DeepImmutable {
 
   @override
   String toString() => 'Snapshot[${as()}]';
+
+  @override
+  int get hashCode => hash2(_decoder, DeepCollectionEquality().hash(as()));
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Snapshot &&
+        other._decoder == _decoder &&
+        DeepCollectionEquality().equals(other.as(), as());
+  }
 }
 
 class _SnapshotImpl extends Snapshot {

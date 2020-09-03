@@ -12,6 +12,7 @@ dependencies:
   intl: ^0.16.1
   meta: ^1.1.8
   collection: ^1.14.0
+  quiver: ^2.1.0
 
 dev_dependencies:
   pedantic: ^1.9.0
