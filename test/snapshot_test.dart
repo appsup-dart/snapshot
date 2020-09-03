@@ -205,9 +205,8 @@ void main() {
         expect(() => v.register<String, DateTime>((_) => DateTime.now()),
             isNot(throwsA(anything)));
         expect(
-            () => v.registerWithFormat<String, DateTime>(
-                (_, __) => DateTime.now(),
-                format: ''),
+            () =>
+                v.register<String, DateTime>((_) => DateTime.now(), format: ''),
             isNot(throwsA(anything)));
         expect(() => v.convert(null), throwsStateError);
       });
@@ -217,15 +216,14 @@ void main() {
         expect(() => v.register<String, DateTime>((_) => DateTime.now()),
             throwsStateError);
         expect(
-            () => v.registerWithFormat<String, DateTime>(
-                (_, __) => DateTime.now(),
-                format: ''),
+            () =>
+                v.register<String, DateTime>((_) => DateTime.now(), format: ''),
             throwsStateError);
         expect(() => v.convert(null), isNot(throwsA(anything)));
       });
       test('Should try converters in reversed order', () {
         var v = SnapshotDecoder.empty()
-          ..registerWithFormat<String, DateTime>((String v, String format) {
+          ..register<String, DateTime>((String v, {String format}) {
             var f = DateFormat(format);
             return f.parse(v);
           }, format: RegExp('.*'))
@@ -244,7 +242,7 @@ void main() {
             throwsFormatException);
 
         v = SnapshotDecoder.from(v)
-          ..registerWithFormat<String, DateTime>((String v, String format) {
+          ..register<String, DateTime>((String v, {String format}) {
             var f = DateFormat(format);
             return f.parse(v);
           }, format: RegExp('.*'))

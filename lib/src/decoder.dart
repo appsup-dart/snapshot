@@ -40,14 +40,14 @@ class SnapshotDecoder {
         (v) => DateTime.fromMicrosecondsSinceEpoch((v * 1000).toInt()),
         format: 'epoch');
     register<String, Uri>((v) => Uri.parse(v));
-    registerWithFormat<String, int>(
-        (v, format) =>
+    register<String, int>(
+        (v, {String format}) =>
             int.parse(v, radix: int.parse(format.substring('radix:'.length))),
         format: RegExp(r'radix:(\d+)'));
     register<String, int>((v) => int.parse(v), format: 'string');
     register<String, double>((v) => double.parse(v), format: 'string');
     register<String, num>((v) => num.parse(v), format: 'string');
-    registerWithFormat<String, DateTime>((String v, String format) {
+    register<String, DateTime>((v, {String format}) {
       var f = DateFormat(format);
       return f.parse(v);
     }, format: RegExp('.*'));
@@ -100,6 +100,14 @@ class SnapshotDecoder {
   /// match, or a [RegExp] in which case it will handle any request with a
   /// format that matches this regular expression.
   ///
+  /// When [converter] has a named optional parameter `format`, the `format`
+  /// parameter used in [Snapshot.as] will be forwarded to this converter.
+  ///
+  ///     register<String, DateTime>((String v, {String format}) {
+  ///       var f = DateFormat(format);
+  ///       return f.parse(v);
+  ///     }, format: RegExp('.*'));
+  ///
   /// Converters are applied in reverse order of how they were registered. So,
   /// you can (partly) overwrite an already registered converter, by registering
   /// a new one.
@@ -107,32 +115,14 @@ class SnapshotDecoder {
     if (isSealed) {
       throw StateError('Cannot register new conversion methods when sealed.');
     }
-    _converters.putIfAbsent(T, () => []).add(
-        _SnapshotDecoderFactory<S, T>((s, format) => converter(s), format));
-  }
-
-  /// Registers a conversion function that takes an extra format parameter
-  ///
-  /// Same as [SnapshotDecoder.register], except that the [converter] will be
-  /// called with the additional format parameter used in [Snapshot.as]. This
-  /// allows to modify the behavior depending on the format. For example, the
-  /// following code will register a converter that handles all non-null formats
-  /// to convert from string to [DateTime] and will interpret the format as a
-  /// [DateFormat].
-  ///
-  ///     registerWithFormat<String, DateTime>((String v, String format) {
-  ///       var f = DateFormat(format);
-  ///       return f.parse(v);
-  ///     }, format: RegExp('.*'));
-  ///
-  ///
-  void registerWithFormat<S, T>(T Function(S, String) converter,
-      {@required Pattern format}) {
-    if (isSealed) {
-      throw StateError('Cannot register new conversion methods when sealed.');
-    }
-    _converters.putIfAbsent(T, () => []).add(_SnapshotDecoderFactory<S, T>(
-        (s, format) => converter(s, format), format));
+    _converters
+        .putIfAbsent(T, () => [])
+        .add(_SnapshotDecoderFactory<S, T>((s, format) {
+          if (converter is T Function(S, {String format})) {
+            return converter(s, format: format);
+          }
+          return converter(s);
+        }, format));
   }
 
   /// Converts [input] to an object of type T
