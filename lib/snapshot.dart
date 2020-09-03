@@ -11,6 +11,7 @@ import 'package:quiver/core.dart';
 import 'package:snapshot/src/deep_immutable.dart';
 
 export 'src/snapshot_view.dart';
+export 'src/stream.dart';
 
 part 'src/decoder.dart';
 part 'src/snapshot.dart';
