@@ -7,7 +7,8 @@ import 'snapshot_view.dart';
 
 final _decoder = SnapshotDecoder()
   ..register<List<Map<String, dynamic>>, Patch>((v) => Patch.fromJson(v))
-  ..register<Map<String, dynamic>, Operation>((v) => Operation.fromJson(v));
+  ..register<Map<String, dynamic>, Operation>((v) => Operation.fromJson(v))
+  ..seal();
 
 /// Describes changes between JSON-like objects.
 class Patch extends UnmodifiableSnapshotView {
