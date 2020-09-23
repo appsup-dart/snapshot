@@ -25,7 +25,9 @@ extension SnapshotStreamX on Stream<Snapshot> {
   /// stream can be created that does not require the original stream to be
   /// listened to.
   Stream<Snapshot> child(String path) {
-    if (this is EfficientChild) return this.child(path)?.distinct();
+    if (this is EfficientChild) {
+      return (this as EfficientChild).child(path)?.distinct();
+    }
 
     return map((s) => s.child(path)).distinct();
   }
@@ -86,10 +88,11 @@ extension SnapshotStreamX on Stream<Snapshot> {
         return keys.fold(s, (s, k) => s.setPath(k, mapper(k, s.child(k))));
       });
 
-  Stream<Snapshot> mapPath(String path, dynamic Function(Snapshot value) mapper) =>
-  map((s) {
-    return s.setPath(path, mapper(s.child(path)));
-  });
+  Stream<Snapshot> mapPath(
+          String path, dynamic Function(Snapshot value) mapper) =>
+      map((s) {
+        return s.setPath(path, mapper(s.child(path)));
+      });
 
   /// Updates the content of each child with the values of the stream returned
   /// by [mapper]
