@@ -25,7 +25,7 @@ extension SnapshotStreamX on Stream<Snapshot> {
   /// stream can be created that does not require the original stream to be
   /// listened to.
   Stream<Snapshot> child(String path) {
-    if (this is EfficientChild) return child(path)?.distinct();
+    if (this is EfficientChild) return this.child(path)?.distinct();
 
     return map((s) => s.child(path)).distinct();
   }
