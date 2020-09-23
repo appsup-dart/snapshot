@@ -1,7 +1,8 @@
 library snapshot.view;
 
-import 'package:snapshot/snapshot.dart';
 import 'package:meta/meta.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:snapshot/snapshot.dart';
 
 /// A mixin to be used to implement data classes
 ///
@@ -99,25 +100,59 @@ class UnmodifiableSnapshotView with SnapshotView {
 ///     print(snapshot.get<Address>('address').city); // prints 'New York'
 ///
 class ModifiableSnapshotView with SnapshotView {
-  ModifiableSnapshotView._fromSnapshot(this._snapshot);
+  final BehaviorSubject<Snapshot> _snapshots = BehaviorSubject();
 
-  ModifiableSnapshotView.fromJson(dynamic json, {SnapshotDecoder decoder})
-      : this._fromSnapshot(Snapshot.empty(decoder: decoder).set(json));
+  ModifiableSnapshotView.fromJson(dynamic json, {SnapshotDecoder decoder}) {
+    _snapshots.add(Snapshot.empty(decoder: decoder).set(json));
+  }
+
+  ModifiableSnapshotView.fromStream(Stream<Snapshot> stream) {
+    _snapshots.addStream(stream.doOnDone(() {
+      _snapshots.close();
+    }));
+  }
 
   @override
-  Snapshot _snapshot;
+  Snapshot get _snapshot => _snapshots.value;
+
+  bool get isDisposed => _isDisposed;
+  bool _isDisposed = false;
+  Future<void> dispose() async {
+    _isDisposed = true;
+    await _snapshots.close();
+  }
 }
 
 /// This extension makes setters available to update the content of the snapshot
-extension ModifiableSnapshotViewExtension on ModifiableSnapshotView {
+extension ModifiableSnapshotViewX on ModifiableSnapshotView {
   /// Updates the content at [path] with [value]
   ///
   /// When [path] is null, will set the root snapshot
+  ///
+  /// To use this method, the [ModifiableSnapshotView.fromJson] constructor
+  /// should have been used.
   void set(String path, dynamic value) {
     if (path == null) {
-      _snapshot = _snapshot.set(value);
+      _snapshots.add(_snapshot.set(value));
     } else {
-      _snapshot = _snapshot.setPath(path, value);
+      _snapshots.add(_snapshot.setPath(path, value));
     }
   }
+
+  Stream<SnapshotViewChangeEvent> get onChanged => DeferStream(() {
+        Snapshot last;
+        return _snapshots.stream.map((v) {
+          var event = SnapshotViewChangeEvent(oldValue: last, newValue: v);
+          last = v;
+          return event;
+        });
+      }, reusable: true);
+}
+
+class SnapshotViewChangeEvent {
+  final Snapshot oldValue;
+
+  final Snapshot newValue;
+
+  SnapshotViewChangeEvent({this.oldValue, this.newValue});
 }
