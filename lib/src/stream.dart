@@ -86,6 +86,11 @@ extension SnapshotStreamX on Stream<Snapshot> {
         return keys.fold(s, (s, k) => s.setPath(k, mapper(k, s.child(k))));
       });
 
+  Stream<Snapshot> mapPath(String path, dynamic Function(Snapshot value) mapper) =>
+  map((s) {
+    return s.setPath(path, mapper(s.child(path)));
+  });
+
   /// Updates the content of each child with the values of the stream returned
   /// by [mapper]
   Stream<Snapshot> switchChildren(
