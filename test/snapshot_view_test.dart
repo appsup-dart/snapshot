@@ -83,6 +83,30 @@ void main() {
       });
     });
   });
+
+  group('ModifiableSnapshotView', () {
+    group('ModifiableSnapshotView.fromJson', () {
+      test('Should create a SnapshotView with initial data', () {
+        var snapshot = ModifiableSnapshotView.fromJson({
+          'firstname': 'John',
+          'address': {'addressLine1': 'Mainstreet 1', 'city': 'London'}
+        });
+
+        expect(snapshot.get('address/city'), 'London');
+        expect(snapshot.get('firstname'), 'John');
+      });
+      test('Should allow to set content', () {
+        var snapshot = ModifiableSnapshotView.fromJson({
+          'firstname': 'John',
+          'address': {'addressLine1': 'Mainstreet 1', 'city': 'London'}
+        });
+
+        snapshot.set('address/city', 'New York');
+
+        expect(snapshot.get('address/city'), 'New York');
+      });
+    });
+  });
 }
 
 mixin AddressMixin on SnapshotView {
