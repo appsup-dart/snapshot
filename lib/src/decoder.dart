@@ -129,11 +129,12 @@ class SnapshotDecoder {
   ///
   /// Throws a [StateError] when not sealed.
   /// Throws a [FormatException] when no applicable converter registered.
-  T convert<T>(dynamic input, {String format}) {
+  T convert<T>(Snapshot input, {String format}) {
     if (!isSealed) {
       throw StateError('Cannot be used when not sealed.');
     }
-    if (input is T) return input;
+    var value = input.value;
+    if (value is T) return value;
     var factories = _converters[T] ?? [];
     for (var factory in factories.reversed) {
       if (factory.canHandle(input, format)) {
@@ -150,8 +151,9 @@ class _SnapshotDecoderFactory<S, T> {
 
   _SnapshotDecoderFactory(this.converter, this.format);
 
-  bool canHandle(dynamic v, String format) {
-    if (v is! S) return false;
+  bool canHandle(Snapshot v, String format) {
+    var input = v.value;
+    if (input is! S && S != Snapshot) return false;
     if (!_canHandleFormat(format)) return false;
     return true;
   }
@@ -164,5 +166,7 @@ class _SnapshotDecoderFactory<S, T> {
         matches.any((element) => element.group(0) == format);
   }
 
-  T create(S source, String format) => converter(source, format);
+  T create(Snapshot source, String format) {
+    return converter(S == Snapshot ? source : source.value, format);
+  }
 }

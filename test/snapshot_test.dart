@@ -95,6 +95,19 @@ void main() {
         s = Snapshot.fromJson('2020-01-01');
         expect(s.as<DateTime>(), same(s.as<DateTime>()));
       });
+
+      test('Converting from snapshot', () {
+        var decoder = SnapshotDecoder.from(SnapshotDecoder.defaultDecoder)
+          ..register<Snapshot, Address>((Snapshot v) {
+            print('convert $v');
+
+            return Address(v);
+          })
+          ..seal();
+
+        var s = Snapshot.fromJson({'street': 'Mainstreet'}, decoder: decoder);
+        expect(s.as<Address>().street, 'Mainstreet');
+      });
     });
 
     group('Snapshot.asList()', () {
@@ -279,7 +292,8 @@ void main() {
             () =>
                 v.register<String, DateTime>((_) => DateTime.now(), format: ''),
             throwsStateError);
-        expect(() => v.convert(null), isNot(throwsA(anything)));
+        expect(
+            () => v.convert(Snapshot.fromJson(null)), isNot(throwsA(anything)));
       });
       test('Should try converters in reversed order', () {
         var v = SnapshotDecoder.empty()
@@ -291,14 +305,21 @@ void main() {
               format: 'iso')
           ..seal();
 
-        expect(v.convert<DateTime>('2020-01-01T10:00', format: 'iso'),
+        expect(
+            v.convert<DateTime>(Snapshot.fromJson('2020-01-01T10:00'),
+                format: 'iso'),
             DateTime(2020, 1, 1, 10, 0));
         expect(
-            () => v.convert<DateTime>('2020-01-01T10:00', format: 'dd/MM/yyyy'),
+            () => v.convert<DateTime>(Snapshot.fromJson('2020-01-01T10:00'),
+                format: 'dd/MM/yyyy'),
             throwsFormatException);
-        expect(v.convert<DateTime>('01/01/2020', format: 'dd/MM/yyyy'),
+        expect(
+            v.convert<DateTime>(Snapshot.fromJson('01/01/2020'),
+                format: 'dd/MM/yyyy'),
             DateTime(2020, 1, 1));
-        expect(() => v.convert<DateTime>('01/01/2020', format: 'iso'),
+        expect(
+            () => v.convert<DateTime>(Snapshot.fromJson('01/01/2020'),
+                format: 'iso'),
             throwsFormatException);
 
         v = SnapshotDecoder.from(v)
@@ -308,16 +329,29 @@ void main() {
           }, format: RegExp('.*'))
           ..seal();
 
-        expect(() => v.convert<DateTime>('2020-01-01T10:00', format: 'iso'),
+        expect(
+            () => v.convert<DateTime>(Snapshot.fromJson('2020-01-01T10:00'),
+                format: 'iso'),
             throwsFormatException);
         expect(
-            () => v.convert<DateTime>('2020-01-01T10:00', format: 'dd/MM/yyyy'),
+            () => v.convert<DateTime>(Snapshot.fromJson('2020-01-01T10:00'),
+                format: 'dd/MM/yyyy'),
             throwsFormatException);
-        expect(v.convert<DateTime>('01/01/2020', format: 'dd/MM/yyyy'),
+        expect(
+            v.convert<DateTime>(Snapshot.fromJson('01/01/2020'),
+                format: 'dd/MM/yyyy'),
             DateTime(2020, 1, 1));
-        expect(() => v.convert<DateTime>('01/01/2020', format: 'iso'),
+        expect(
+            () => v.convert<DateTime>(Snapshot.fromJson('01/01/2020'),
+                format: 'iso'),
             throwsFormatException);
       });
     });
   });
+}
+
+class Address extends UnmodifiableSnapshotView {
+  Address(Snapshot snapshot) : super(snapshot);
+
+  String get street => get('street');
 }

@@ -61,6 +61,11 @@ abstract class Snapshot implements DeepImmutable {
   /// the index is out of range, an empty snapshot will be returned.
   Snapshot child(String path);
 
+  /// The raw content of this snapshot
+  ///
+  /// This value is deep immutable
+  dynamic get value;
+
   /// Returns the content of this snapshot as an object of type T.
   ///
   /// When the content is `null` or of type T, the content will be returned as
@@ -149,10 +154,11 @@ abstract class Snapshot implements DeepImmutable {
 }
 
 class _SnapshotImpl extends Snapshot {
-  final dynamic _value;
+  @override
+  final dynamic value;
 
   _SnapshotImpl(dynamic value, {SnapshotDecoder decoder})
-      : _value = toDeepImmutable(value),
+      : value = toDeepImmutable(value),
         super._(decoder: decoder);
 
   final Map<Type, Map<String, dynamic>> _decodingCache = {};
@@ -160,13 +166,12 @@ class _SnapshotImpl extends Snapshot {
 
   @override
   T as<T>({String format}) {
-    return _fromCache(
-        format, () => _decoder.convert<T>(_value, format: format));
+    return _fromCache(format, () => _decoder.convert<T>(this, format: format));
   }
 
   T _fromCache<T>(String format, T Function() ifAbsent) {
-    if (_value == null) return null;
-    if (_value is T) return _value;
+    if (value == null) return null;
+    if (value is T) return value;
     return _decodingCache
         .putIfAbsent(T, () => {})
         .putIfAbsent(format, ifAbsent);
@@ -174,32 +179,32 @@ class _SnapshotImpl extends Snapshot {
 
   @override
   List<T> asList<T>({String format}) => _fromCache(format, () {
-        if (_value is! List) throw FormatException();
-        var length = (_value as List).length;
+        if (value is! List) throw FormatException();
+        var length = (value as List).length;
         return List<T>.unmodifiable(List<T>.generate(
             length, (index) => child('$index').as<T>(format: format)));
       });
 
   @override
   Map<String, T> asMap<T>({String format}) => _fromCache(format, () {
-        if (_value is! Map) throw FormatException();
+        if (value is! Map) throw FormatException();
 
         return Map<String, T>.unmodifiable(Map<String, T>.fromIterable(
-            (_value as Map).keys,
+            (value as Map).keys,
             value: (k) => child(k).as<T>(format: format)));
       });
 
   Snapshot _directChild(String child) => _childrenCache.putIfAbsent(child, () {
-        var value;
-        if (_value is Map) {
-          value = _value[child];
-        } else if (_value is List) {
+        var v;
+        if (value is Map) {
+          v = value[child];
+        } else if (value is List) {
           var index = int.tryParse(child);
-          if (index != null && index >= 0 && index < _value.length) {
-            value = _value[index];
+          if (index != null && index >= 0 && index < value.length) {
+            v = value[index];
           }
         }
-        return _SnapshotImpl(value, decoder: _decoder);
+        return _SnapshotImpl(v, decoder: _decoder);
       });
 
   @override
@@ -214,26 +219,26 @@ class _SnapshotImpl extends Snapshot {
   }
 
   @override
-  Snapshot set(value) {
-    if (value is Snapshot) {
+  Snapshot set(newValue) {
+    if (newValue is Snapshot) {
       // TODO recycle cache
     }
-    value = value is Snapshot ? value.as() : value;
-    var isEqual = DeepCollectionEquality().equals(_value, value);
+    newValue = newValue is Snapshot ? newValue.as() : newValue;
+    var isEqual = DeepCollectionEquality().equals(value, newValue);
     if (isEqual) return this;
 
-    var v = _SnapshotImpl(value, decoder: _decoder);
+    var v = _SnapshotImpl(newValue, decoder: _decoder);
 
-    if (value is Map && _value is Map) {
+    if (newValue is Map && value is Map) {
       _childrenCache.forEach((k, child) {
-        if (value[k] == null) return;
-        v._childrenCache[k] = child.set(value[k]);
+        if (newValue[k] == null) return;
+        v._childrenCache[k] = child.set(newValue[k]);
       });
-    } else if (value is List && _value is List) {
+    } else if (newValue is List && value is List) {
       _childrenCache.forEach((k, child) {
         var index = int.parse(k);
-        if (index >= value.length) return;
-        v._childrenCache[k] = child.set(value[index]);
+        if (index >= newValue.length) return;
+        v._childrenCache[k] = child.set(newValue[index]);
       });
     }
     return v;

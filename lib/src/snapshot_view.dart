@@ -61,10 +61,10 @@ class UnmodifiableSnapshotView with SnapshotView {
   @override
   final Snapshot _snapshot;
 
-  UnmodifiableSnapshotView._fromSnapshot(this._snapshot);
+  UnmodifiableSnapshotView(this._snapshot);
 
   UnmodifiableSnapshotView.fromJson(dynamic json, {SnapshotDecoder decoder})
-      : this._fromSnapshot(Snapshot.empty(decoder: decoder).set(json));
+      : this(Snapshot.empty(decoder: decoder).set(json));
 }
 
 /// Base class for data classes that can be changed
