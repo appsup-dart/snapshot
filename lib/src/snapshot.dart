@@ -129,7 +129,7 @@ abstract class Snapshot implements DeepImmutable {
         ...v,
       ]..[i] = newChild.as());
     }
-    throw ArgumentError();
+    throw ArgumentError('Unable to set $path in $this');
   }
 
   @override
