@@ -105,6 +105,15 @@ abstract class Snapshot implements DeepImmutable {
   ///
   /// Unmodified children and grandchildren are recycled. So, also their
   /// conversions are reused.
+  ///
+  /// [value] may either be a JSON-like object or a [Snapshot].
+  ///
+  /// When the new value equals the old value, this Snapshot will be returned.
+  /// In case the [value] argument was a compatible (i.e. with same decoder)
+  /// [Snapshot], the cache of the argument will be merged into this snapshot.
+  ///
+  /// When [value] is a compatible snapshot, value will be returned with the
+  /// cache of this snapshot merged.
   Snapshot set(dynamic value);
 
   /// Returns a snapshot with updated content at [path].
@@ -220,9 +229,45 @@ class _SnapshotImpl extends Snapshot {
 
   @override
   Snapshot set(newValue) {
-    if (newValue is Snapshot) {
-      // TODO recycle cache
+    if (newValue is _SnapshotImpl && _decoder == newValue._decoder) {
+      // the new value is a snapshot
+
+      if (DeepCollectionEquality().equals(value, newValue.value)) {
+        // content is identical: return this with cache from newValue
+
+        for (var k in newValue._childrenCache.keys) {
+          if (_childrenCache.containsKey(k)) {
+            _childrenCache[k] =
+                _childrenCache[k].set(newValue._childrenCache[k]);
+          } else {
+            _childrenCache[k] = newValue._childrenCache[k];
+          }
+        }
+
+        for (var t in newValue._decodingCache.keys) {
+          for (var f in newValue._decodingCache[t].keys) {
+            _decodingCache
+                .putIfAbsent(t, () => {})
+                .putIfAbsent(f, () => newValue._decodingCache[t][f]);
+          }
+        }
+        return this;
+      } else {
+        // we will return the new value with cache values from old value
+
+        for (var k in _childrenCache.keys) {
+          if (newValue._childrenCache.containsKey(k)) {
+            newValue._childrenCache[k] =
+                _childrenCache[k].set(newValue._childrenCache[k]);
+          } else {
+            newValue._childrenCache[k] = _childrenCache[k];
+          }
+        }
+
+        return newValue;
+      }
     }
+
     newValue = newValue is Snapshot ? newValue.as() : newValue;
     var isEqual = DeepCollectionEquality().equals(value, newValue);
     if (isEqual) return this;

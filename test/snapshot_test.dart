@@ -201,6 +201,65 @@ void main() {
 
         expect(v.child('firstname').as(), 'John');
       });
+
+      group('Setting with compatible snapshot', () {
+        var decoder = SnapshotDecoder.from(SnapshotDecoder.defaultDecoder)
+          ..register<Snapshot, Address>((s) => Address(s))
+          ..seal();
+        var json = {
+          'firstname': 'Jane',
+          'lastname': 'Doe',
+          'address1': {'street': 'Mainstreet', 'number': '1', 'city': 'London'},
+          'address2': {'street': 'Mainstreet', 'number': '1', 'city': 'London'},
+          'address3': {'street': 'Mainstreet', 'number': '1', 'city': 'London'},
+        };
+        test('Should return this when content unchanged', () {
+          var person = Snapshot.fromJson(json, decoder: decoder);
+          var address1Snap = person.child('address1');
+          var address1 = address1Snap.as<Address>();
+          var address3Snap = person.child('address3');
+
+          var newValue = Snapshot.fromJson(json, decoder: decoder);
+          newValue.child('address1').as<Address>();
+          var address2Snap = newValue.child('address2');
+          var address2 = address2Snap.as<Address>();
+          var address3 = newValue.child('address3').as<Address>();
+
+          var v = person.set(newValue);
+
+          expect(v, same(person));
+          expect(v.child('address1'), same(address1Snap));
+          expect(v.child('address1').as<Address>(), same(address1));
+          expect(v.child('address2'), same(address2Snap));
+          expect(v.child('address2').as<Address>(), same(address2));
+          expect(v.child('address3'), same(address3Snap));
+          expect(v.child('address3').as<Address>(), same(address3));
+        });
+
+        test('Should return other when content changed', () {
+          var person = Snapshot.fromJson(json, decoder: decoder);
+          var address1Snap = person.child('address1');
+          var address1 = address1Snap.as<Address>();
+          var address3Snap = person.child('address3');
+
+          var newValue =
+              Snapshot.fromJson(json..['firstname'] = 'John', decoder: decoder);
+          newValue.child('address1').as<Address>();
+          var address2Snap = newValue.child('address2');
+          var address2 = address2Snap.as<Address>();
+          var address3 = newValue.child('address3').as<Address>();
+
+          var v = person.set(newValue);
+
+          expect(v, same(newValue));
+          expect(v.child('address1'), same(address1Snap));
+          expect(v.child('address1').as<Address>(), same(address1));
+          expect(v.child('address2'), same(address2Snap));
+          expect(v.child('address2').as<Address>(), same(address2));
+          expect(v.child('address3'), same(address3Snap));
+          expect(v.child('address3').as<Address>(), same(address3));
+        });
+      });
     });
 
     group('Snapshot.setPath()', () {
