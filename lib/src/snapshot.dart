@@ -142,7 +142,7 @@ abstract class Snapshot implements DeepImmutable {
     var snapshot = Snapshot.fromJson(newContent, decoder: _decoder);
 
     if (value is Snapshot && value._decoder == _decoder) {
-      var parent = child(pointer.parent.toString());
+      var parent = snapshot.child(pointer.parent.toString());
       (parent as _SnapshotImpl)._childrenCache[pointer.segments.last] = value;
     }
     return set(snapshot);
@@ -282,7 +282,8 @@ class _SnapshotImpl extends Snapshot {
             newValue._childrenCache[k] =
                 _childrenCache[k].set(newValue._childrenCache[k]);
           } else {
-            newValue._childrenCache[k] = _childrenCache[k];
+            newValue._childrenCache[k] =
+                _childrenCache[k].set(newValue._directChild(k));
           }
         }
 
