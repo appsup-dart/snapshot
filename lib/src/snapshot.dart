@@ -112,38 +112,60 @@ abstract class Snapshot implements DeepImmutable {
   /// In case the [value] argument was a compatible (i.e. with same decoder)
   /// [Snapshot], the cache of the argument will be merged into this snapshot.
   ///
-  /// When [value] is a compatible snapshot, value will be returned with the
-  /// cache of this snapshot merged.
+  /// When [value] is a compatible snapshot (and the content changed), value
+  /// will be returned with the cache of this snapshot merged.
   Snapshot set(dynamic value);
 
   /// Returns a snapshot with updated content at [path].
   ///
   /// Unmodified children and grandchildren are recycled. So, also their
   /// conversions are reused.
+  ///
+  /// [value] may either be a JSON-like object or a [Snapshot].
+  ///
+  /// When the updated value equals the old value, this snapshot will be
+  /// returned. In case the [value] argument was a compatible (i.e. with same
+  /// decoder) [Snapshot], the cache of the argument will be merged into this
+  /// snapshot.
+  ///
+  /// When [value] is a compatible snapshot (and the content changed), the
+  /// returned snapshot will contain [value] in its cache.
   Snapshot setPath(String path, dynamic value) {
     var pointer =
         JsonPointer.fromString(path.startsWith('/') ? path : '/$path');
-    return _setPath(pointer.segments, value);
+
+    if (pointer.segments.isEmpty) return set(value);
+
+    var content = value is Snapshot ? value.value : value;
+    var newContent = _setPathInContent(this.value, pointer.segments, content);
+
+    var snapshot = Snapshot.fromJson(newContent, decoder: _decoder);
+
+    if (value is Snapshot && value._decoder == _decoder) {
+      var parent = child(pointer.parent.toString());
+      (parent as _SnapshotImpl)._childrenCache[pointer.segments.last] = value;
+    }
+    return set(snapshot);
   }
 
-  Snapshot _setPath(Iterable<String> path, dynamic value) {
-    if (path.isEmpty) return set(value);
+  dynamic _setPathInContent(
+      dynamic value, Iterable<String> path, dynamic newValue) {
+    if (path.isEmpty) return newValue;
 
-    var oldChild = child(path.first);
-    var newChild = oldChild._setPath(path.skip(1), value);
-    if (oldChild == newChild) return this;
+    var child = path.first;
+    path = path.skip(1);
 
-    var v = as();
-    if (v is Map) {
-      return set({...v, path.first: newChild.as()});
+    if (value is Map) {
+      return toDeepImmutable({...value}..[child] =
+          _setPathInContent(value[child], path, newValue));
     }
-    if (v is List) {
-      var i = int.parse(path.first);
-      return set([
-        ...v,
-      ]..[i] = newChild.as());
+    if (value is List) {
+      var i = int.parse(child);
+      return toDeepImmutable([
+        ...value,
+      ]..[i] = _setPathInContent(value[i], path, newValue));
     }
-    throw ArgumentError('Unable to set $path in $this');
+    throw ArgumentError('Unable to set $path in $value');
   }
 
   @override

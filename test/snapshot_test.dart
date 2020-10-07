@@ -289,6 +289,23 @@ void main() {
 
         expect(v.child('address/city').as(), 'New York');
       });
+
+      test('Setting same snapshot twice at different locations', () {
+        var persons = Snapshot.fromJson({
+          'jane-doe': {'firstname': 'Jane', 'lastname': 'Doe'},
+          'john-doe': {'firstname': 'John', 'lastname': 'Doe'}
+        });
+
+        var address = Snapshot.fromJson(
+            {'street': 'Mainstreet', 'number': '1', 'city': 'London'});
+
+        persons = persons
+            .setPath('jane-doe/address', address)
+            .setPath('john-doe/address', address);
+
+        expect(persons.child('jane-doe/address'),
+            same(persons.child('john-doe/address')));
+      });
     });
 
     group('Snapshot.operator==', () {
