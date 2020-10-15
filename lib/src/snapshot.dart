@@ -154,6 +154,14 @@ abstract class Snapshot implements DeepImmutable {
     return set(snapshot);
   }
 
+  /// Returns a snapshot with another [decoder].
+  ///
+  /// When [decoder] is equal to the current decoder, this method will return
+  /// the current snapshot.
+  Snapshot withDecoder(SnapshotDecoder decoder) => decoder == this.decoder
+      ? this
+      : Snapshot.fromJson(value, decoder: decoder);
+
   dynamic _setPathInContent(
       dynamic value, Iterable<String> path, dynamic newValue,
       {bool createParents = true}) {

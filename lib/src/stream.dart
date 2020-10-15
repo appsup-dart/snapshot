@@ -112,6 +112,10 @@ extension SnapshotStreamX on Stream<Snapshot> {
   /// Returns a snapshot stream where each new emitted snapshot reuses the cache
   /// of the previous snapshot with the same decoder.
   Stream<Snapshot> recycle() => _RecyclingSnapshotStream.root(this);
+
+  /// Returns a snapshot stream where each snapshot has the decoder [decoder].
+  Stream<Snapshot> withDecoder(SnapshotDecoder decoder) =>
+      map((s) => s.withDecoder(decoder));
 }
 
 mixin EfficientChild on Stream<Snapshot> {

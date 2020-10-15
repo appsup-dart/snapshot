@@ -3,6 +3,10 @@ import 'package:snapshot/snapshot.dart';
 import 'package:test/test.dart';
 
 void main() {
+  var decoderWithAddress = SnapshotDecoder.from(SnapshotDecoder.defaultDecoder)
+    ..register<Snapshot, Address>((v) => Address(v))
+    ..seal();
+
   group('Snapshot', () {
     group('Snapshot.child()', () {
       var v = Snapshot.fromJson({
@@ -97,15 +101,8 @@ void main() {
       });
 
       test('Converting from snapshot', () {
-        var decoder = SnapshotDecoder.from(SnapshotDecoder.defaultDecoder)
-          ..register<Snapshot, Address>((Snapshot v) {
-            print('convert $v');
-
-            return Address(v);
-          })
-          ..seal();
-
-        var s = Snapshot.fromJson({'street': 'Mainstreet'}, decoder: decoder);
+        var s = Snapshot.fromJson({'street': 'Mainstreet'},
+            decoder: decoderWithAddress);
         expect(s.as<Address>().street, 'Mainstreet');
       });
     });
@@ -203,9 +200,6 @@ void main() {
       });
 
       group('Setting with compatible snapshot', () {
-        var decoder = SnapshotDecoder.from(SnapshotDecoder.defaultDecoder)
-          ..register<Snapshot, Address>((s) => Address(s))
-          ..seal();
         var json = {
           'firstname': 'Jane',
           'lastname': 'Doe',
@@ -214,12 +208,12 @@ void main() {
           'address3': {'street': 'Mainstreet', 'number': '1', 'city': 'London'},
         };
         test('Should return this when content unchanged', () {
-          var person = Snapshot.fromJson(json, decoder: decoder);
+          var person = Snapshot.fromJson(json, decoder: decoderWithAddress);
           var address1Snap = person.child('address1');
           var address1 = address1Snap.as<Address>();
           var address3Snap = person.child('address3');
 
-          var newValue = Snapshot.fromJson(json, decoder: decoder);
+          var newValue = Snapshot.fromJson(json, decoder: decoderWithAddress);
           newValue.child('address1').as<Address>();
           var address2Snap = newValue.child('address2');
           var address2 = address2Snap.as<Address>();
@@ -237,13 +231,13 @@ void main() {
         });
 
         test('Should return other when content changed', () {
-          var person = Snapshot.fromJson(json, decoder: decoder);
+          var person = Snapshot.fromJson(json, decoder: decoderWithAddress);
           var address1Snap = person.child('address1');
           var address1 = address1Snap.as<Address>();
           var address3Snap = person.child('address3');
 
-          var newValue =
-              Snapshot.fromJson(json..['firstname'] = 'John', decoder: decoder);
+          var newValue = Snapshot.fromJson(json..['firstname'] = 'John',
+              decoder: decoderWithAddress);
           newValue.child('address1').as<Address>();
           var address2Snap = newValue.child('address2');
           var address2 = address2Snap.as<Address>();
@@ -323,6 +317,32 @@ void main() {
       });
     });
 
+    group('Snapshot.withDecoder()', () {
+      test('Should return new snapshot with new decoder', () {
+        var v = Snapshot.fromJson({
+          'firstname': 'Jane',
+          'lastname': 'Doe',
+          'address': {'city': 'London'}
+        });
+
+        var w = v.withDecoder(decoderWithAddress);
+
+        expect(v, isNot(w));
+        expect(w.decoder, decoderWithAddress);
+        expect(w.child('address').as<Address>().city, 'London');
+      });
+      test('Should return same snapshot when decoder same', () {
+        var v = Snapshot.fromJson({
+          'firstname': 'Jane',
+          'lastname': 'Doe',
+          'address': {'city': 'London'}
+        }, decoder: decoderWithAddress);
+
+        var w = v.withDecoder(decoderWithAddress);
+
+        expect(v, same(w));
+      });
+    });
     group('Snapshot.operator==', () {
       test('Snapshots are equal when same decoder and content', () {
         void _checkEquality(v) {
@@ -445,4 +465,5 @@ class Address extends UnmodifiableSnapshotView {
   Address(Snapshot snapshot) : super(snapshot);
 
   String get street => get('street');
+  String get city => get('city');
 }
