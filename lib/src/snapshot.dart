@@ -130,14 +130,19 @@ abstract class Snapshot implements DeepImmutable {
   ///
   /// When [value] is a compatible snapshot (and the content changed), the
   /// returned snapshot will contain [value] in its cache.
-  Snapshot setPath(String path, dynamic value) {
+  ///
+  /// When [createParents] is true (default) and some of the parents do not
+  /// exist or are not of type Map or List, they are created (as a Map). When
+  /// [createParents] is false an error will be thrown.
+  Snapshot setPath(String path, dynamic value, {bool createParents = true}) {
     var pointer =
         JsonPointer.fromString(path.startsWith('/') ? path : '/$path');
 
     if (pointer.segments.isEmpty) return set(value);
 
     var content = value is Snapshot ? value.value : value;
-    var newContent = _setPathInContent(this.value, pointer.segments, content);
+    var newContent = _setPathInContent(this.value, pointer.segments, content,
+        createParents: createParents);
 
     var snapshot = Snapshot.fromJson(newContent, decoder: _decoder);
 
@@ -149,23 +154,45 @@ abstract class Snapshot implements DeepImmutable {
   }
 
   dynamic _setPathInContent(
-      dynamic value, Iterable<String> path, dynamic newValue) {
+      dynamic value, Iterable<String> path, dynamic newValue,
+      {bool createParents = true}) {
     if (path.isEmpty) return newValue;
 
     var child = path.first;
     path = path.skip(1);
 
-    if (value is Map) {
-      return toDeepImmutable({...value}..[child] =
-          _setPathInContent(value[child], path, newValue));
+    dynamic setChild(value, child, newValue) {
+      if (value is Map) {
+        return {...value}..[child] = newValue;
+      }
+      if (value is List) {
+        var i = int.parse(child);
+        return [...value]..[i] = newValue;
+      }
+      if (createParents) {
+        return {child: newValue};
+      }
+      throw ArgumentError('Unable to set $child in $value');
     }
-    if (value is List) {
-      var i = int.parse(child);
-      return toDeepImmutable([
-        ...value,
-      ]..[i] = _setPathInContent(value[i], path, newValue));
+
+    dynamic directChild(dynamic value, String child) {
+      if (value is Map) {
+        return value[child];
+      }
+      if (value is List) {
+        var index = int.tryParse(child);
+        if (index != null && index >= 0 && index < value.length) {
+          return value[index];
+        }
+      }
+      return null;
     }
-    throw ArgumentError('Unable to set $path in $value');
+
+    return toDeepImmutable(setChild(
+        value,
+        child,
+        _setPathInContent(directChild(value, child), path, newValue,
+            createParents: createParents)));
   }
 
   @override

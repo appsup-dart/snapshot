@@ -306,6 +306,21 @@ void main() {
         expect(persons.child('jane-doe/address'),
             same(persons.child('john-doe/address')));
       });
+
+      test('Setting a non existing parent', () {
+        var persons = Snapshot.empty();
+
+        persons = persons.setPath('jane-doe/firstname', 'Jane');
+
+        expect(persons.value, {
+          'jane-doe': {'firstname': 'Jane'}
+        });
+
+        expect(
+            () => persons.setPath('john-doe/firstname', 'John',
+                createParents: false),
+            throwsArgumentError);
+      });
     });
 
     group('Snapshot.operator==', () {
