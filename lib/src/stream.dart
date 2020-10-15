@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:json_patch/json_patch.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:snapshot/snapshot.dart';
 
@@ -107,8 +108,41 @@ extension SnapshotStreamX on Stream<Snapshot> {
           return l.fold(s, (s, e) => s.setPath(e.key, e.value));
         });
       });
+
+  /// Returns a snapshot stream where each new emitted snapshot reuses the cache
+  /// of the previous snapshot with the same decoder.
+  Stream<Snapshot> recycle() => _RecyclingSnapshotStream.root(this);
 }
 
 mixin EfficientChild on Stream<Snapshot> {
   Stream<Snapshot> child(String path);
+}
+
+class _RecyclingSnapshotStream extends StreamView<Snapshot>
+    with EfficientChild {
+  final Map<SnapshotDecoder, Snapshot> _sparseRootSnapshot;
+
+  final String _path;
+  final Stream<Snapshot> _stream;
+
+  _RecyclingSnapshotStream.root(Stream<Snapshot> stream) : this({}, '', stream);
+
+  _RecyclingSnapshotStream(this._sparseRootSnapshot, this._path, this._stream)
+      : super(_stream.map((event) {
+          var root = _sparseRootSnapshot.putIfAbsent(
+              event.decoder, () => Snapshot.empty(decoder: event.decoder));
+          root =
+              _sparseRootSnapshot[event.decoder] = root.setPath(_path, event);
+
+          return root.child(_path);
+        }));
+
+  @override
+  Stream<Snapshot> child(String path) {
+    var p = JsonPointer.join(JsonPointer.fromString(_path),
+        JsonPointer.fromString(path.startsWith('/') ? path : '/$path'));
+
+    return _RecyclingSnapshotStream(
+        _sparseRootSnapshot, p.toString(), _stream.child(path));
+  }
 }

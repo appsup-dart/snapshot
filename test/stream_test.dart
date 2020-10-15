@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:rxdart/rxdart.dart';
 import 'package:snapshot/snapshot.dart';
 import 'package:test/test.dart';
 
@@ -227,6 +228,30 @@ void main() async {
 
         expect((await stream.first).as(),
             {'jane': 'Jane Doe', 'john': 'John Doe'});
+      });
+    });
+    group('Stream<Snapshot>.recycle', () {
+      test('Stream<Snapshot>.recycle', () async {
+        var controller = BehaviorSubject<Snapshot>();
+
+        var stream = controller.stream.recycle();
+
+        var value = {
+          'persons': {
+            'jane-doe': {'firstname': 'Jane', 'lastname': 'Doe'},
+            'john-doe': {'firstname': 'John', 'lastname': 'Doe'}
+          }
+        };
+
+        controller.add(Snapshot.fromJson(value));
+
+        var jane = await stream.child('persons/jane-doe').as<dynamic>().first;
+
+        controller.add(Snapshot.fromJson(value));
+
+        var jane2 = await stream.child('persons/jane-doe').as<dynamic>().first;
+
+        expect(jane2, same(jane));
       });
     });
   });
