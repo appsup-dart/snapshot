@@ -1,5 +1,7 @@
 library snapshot.view;
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:snapshot/snapshot.dart';
@@ -107,9 +109,24 @@ class ModifiableSnapshotView with SnapshotView {
   }
 
   ModifiableSnapshotView.fromStream(Stream<Snapshot> stream) {
-    _snapshots.addStream(stream.doOnDone(() {
-      _snapshots.close();
-    }));
+    StreamSubscription subscription;
+    _snapshots.onListen = () {
+      subscription ??= stream.listen(_snapshots.add,
+          onError: _snapshots.addError, onDone: _snapshots.close);
+      subscription.resume();
+    };
+    _snapshots.onCancel = () {
+      if (stream.isBroadcast) {
+        subscription.cancel();
+        subscription = null;
+      } else {
+        subscription.pause();
+      }
+    };
+    _snapshots.done.then((v) {
+      subscription?.cancel();
+      subscription = null;
+    });
   }
 
   @override

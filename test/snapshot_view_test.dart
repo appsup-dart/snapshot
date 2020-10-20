@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:snapshot/snapshot.dart';
 import 'package:test/test.dart';
 
@@ -104,6 +106,90 @@ void main() {
         snapshot.set('address/city', 'New York');
 
         expect(snapshot.get('address/city'), 'New York');
+      });
+    });
+
+    group('ModifiableSnapshotView.fromStream', () {
+      test('Lifecycle for non broadcast stream', () async {
+        var listenCalled = false,
+            pauseCalled = false,
+            cancelCalled = false,
+            resumeCalled = false;
+        var controller = StreamController<Snapshot>(onListen: () {
+          listenCalled = true;
+        }, onPause: () {
+          pauseCalled = true;
+        }, onResume: () {
+          resumeCalled = true;
+        }, onCancel: () {
+          cancelCalled = true;
+        });
+        var view = ModifiableSnapshotView.fromStream(controller.stream);
+
+        expect(view.snapshot, isNull);
+        expect(listenCalled, false);
+
+        // listening on onChanged should trigger listen on controller
+        var s = view.onChanged.listen((_) => null);
+        expect(view.snapshot, isNull);
+        expect(listenCalled, true);
+
+        // adding a snapshot to the controller should update the view
+        controller.add(Snapshot.empty());
+        await Future.microtask(() => null);
+        expect(view.snapshot, isNotNull);
+
+        // canceling the subscription onChanged should pause the controller
+        expect(pauseCalled, false);
+        await s.cancel();
+        expect(pauseCalled, true);
+
+        // listening again should trigger resume on controller
+        expect(resumeCalled, false);
+        s = view.onChanged.listen((_) => null);
+        expect(resumeCalled, true);
+
+        // disposing the snapshot view should cancel the controller
+        expect(cancelCalled, false);
+        await view.dispose();
+        expect(cancelCalled, true);
+      });
+      test('Lifecycle for broadcast stream', () async {
+        var listenCalled = false, cancelCalled = false;
+        var controller = StreamController<Snapshot>.broadcast(onListen: () {
+          listenCalled = true;
+        }, onCancel: () {
+          cancelCalled = true;
+        });
+        var view = ModifiableSnapshotView.fromStream(controller.stream);
+
+        expect(view.snapshot, isNull);
+        expect(listenCalled, false);
+
+        // listening on onChanged should trigger listen on controller
+        var s = view.onChanged.listen((_) => null);
+        expect(view.snapshot, isNull);
+        expect(listenCalled, true);
+
+        // adding a snapshot to the controller should update the view
+        controller.add(Snapshot.empty());
+        await Future.microtask(() => null);
+        expect(view.snapshot, isNotNull);
+
+        // canceling the subscription should cancel the controller
+        expect(cancelCalled, false);
+        await s.cancel();
+        expect(cancelCalled, true);
+
+        // listening again should trigger listen on controller
+        listenCalled = false;
+        s = view.onChanged.listen((_) => null);
+        expect(listenCalled, true);
+
+        // disposing the snapshot view should cancel the controller
+        cancelCalled = false;
+        await view.dispose();
+        expect(cancelCalled, true);
       });
     });
   });
