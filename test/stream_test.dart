@@ -200,6 +200,20 @@ void main() async {
         ]);
         expect(values, l);
       });
+
+      test('Should keep broadcast behavior', () async {
+        var controller = StreamController.broadcast();
+
+        var stream = controller.stream.toSnapshots();
+
+        stream = stream.switchPath('address', (s) {
+          var v =
+              '${s.child('street').as()} ${s.child('number').as()}, ${s.child('city').as()}';
+          return Stream.value(v);
+        });
+
+        expect(stream.isBroadcast, true);
+      });
     });
 
     group('Stream<Snapshot>.mapChildren', () {

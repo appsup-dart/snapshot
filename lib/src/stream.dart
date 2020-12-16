@@ -70,15 +70,18 @@ extension SnapshotStreamX on Stream<Snapshot> {
   /// [path] whenever this child changes.
   Stream<Snapshot> switchPath(
       String path, Stream<dynamic> Function(Snapshot snapshot) mapper) {
-    var controller = StreamController<Snapshot>(sync: true);
-    var stream = doOnDone(() {
-      controller.close();
+    var controller = BehaviorSubject<Snapshot>(sync: true);
+
+    return doOnData((v) => controller.add(v))
+        .doOnDone(() => controller.close())
+        .map((v) => v.child(path))
+        .distinct()
+        .switchMap((v) {
+      return CombineLatestStream.combine2<Snapshot, dynamic, Snapshot>(
+          controller.stream, mapper(v), (a, b) {
+        return a.setPath(path, b);
+      });
     });
-    return stream.map((v) {
-      controller.add(v);
-      return v;
-    }).asyncSetPath(path,
-        controller.stream.child(path).switchMap((value) => mapper(value)));
   }
 
   /// Updates the content of each child with the value returned by [mapper]

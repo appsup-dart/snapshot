@@ -1,6 +1,6 @@
 name: snapshot
 description: A library that can be used to implement data classes and simplifies conversion of JSON to data classes
-version: 0.1.0-dev.3
+version: 0.1.0-dev.4
 homepage: https://github.com/appsup-dart/snapshot
 
 environment:
@@ -13,7 +13,7 @@ dependencies:
   meta: ^1.1.8
   collection: ^1.14.0
   quiver: ^2.1.0
-  rxdart: ^0.24.0
+  rxdart: ^0.25.0
 
 dev_dependencies:
   pedantic: ^1.9.0
