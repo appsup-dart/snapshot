@@ -126,17 +126,19 @@ void main() {
         });
         var view = ModifiableSnapshotView.fromStream(controller.stream);
 
-        expect(view.snapshot, isNull);
+        expect(() => view.snapshot, throwsStateError);
+        expect(view.hasValue, false);
         expect(listenCalled, false);
 
         // listening on onChanged should trigger listen on controller
         var s = view.onChanged.listen((_) => null);
-        expect(view.snapshot, isNull);
+        expect(view.hasValue, false);
         expect(listenCalled, true);
 
         // adding a snapshot to the controller should update the view
         controller.add(Snapshot.empty());
         await Future.microtask(() => null);
+        expect(view.hasValue, true);
         expect(view.snapshot, isNotNull);
 
         // canceling the subscription onChanged should pause the controller
@@ -163,17 +165,19 @@ void main() {
         });
         var view = ModifiableSnapshotView.fromStream(controller.stream);
 
-        expect(view.snapshot, isNull);
+        expect(() => view.snapshot, throwsStateError);
+        expect(view.hasValue, false);
         expect(listenCalled, false);
 
         // listening on onChanged should trigger listen on controller
         var s = view.onChanged.listen((_) => null);
-        expect(view.snapshot, isNull);
+        expect(view.hasValue, false);
         expect(listenCalled, true);
 
         // adding a snapshot to the controller should update the view
         controller.add(Snapshot.empty());
         await Future.microtask(() => null);
+        expect(view.hasValue, true);
         expect(view.snapshot, isNotNull);
 
         // canceling the subscription should cancel the controller
@@ -196,17 +200,17 @@ void main() {
 }
 
 mixin AddressMixin on SnapshotView {
-  String get addressLine1 => get('addressLine1');
+  String /*?*/ get addressLine1 => get('addressLine1');
 
-  String get city => get('city');
+  String /*?*/ get city => get('city');
 }
 
 class Address = UnmodifiableSnapshotView with AddressMixin;
 
 mixin ModifiableAddressMixin on ModifiableSnapshotView {
-  set addressLine1(String v) => set('addressLine1', v);
+  set addressLine1(String /*?*/ v) => set('addressLine1', v);
 
-  set city(String v) => set('city', v);
+  set city(String /*?*/ v) => set('city', v);
 }
 
 class ModifiableAddress = ModifiableSnapshotView

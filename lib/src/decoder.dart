@@ -41,13 +41,13 @@ class SnapshotDecoder {
         format: 'epoch');
     register<String, Uri>((v) => Uri.parse(v));
     register<String, int>(
-        (v, {String format}) =>
+        (v, {String /*?*/ format}) =>
             int.parse(v, radix: int.parse(format.substring('radix:'.length))),
         format: RegExp(r'radix:(\d+)'));
     register<String, int>((v) => int.parse(v), format: 'string');
     register<String, double>((v) => double.parse(v), format: 'string');
     register<String, num>((v) => num.parse(v), format: 'string');
-    register<String, DateTime>((v, {String format}) {
+    register<String, DateTime>((v, {String /*?*/ format}) {
       var f = DateFormat(format);
       return f.parse(v);
     }, format: RegExp('.*'));
@@ -65,12 +65,12 @@ class SnapshotDecoder {
   /// and [SnapshotDecoder.registerWithFormat]. Before being able to use this
   /// [SnapshotDecoder], you'll need to seal it by calling [SnapshotDecoder.seal].
   SnapshotDecoder.from(SnapshotDecoder other) {
-    for (var t in other._converters.keys) {
-      var l = _converters.putIfAbsent(t, () => []);
-      for (var c in other._converters[t]) {
+    other._converters.forEach((key, value) {
+      var l = _converters.putIfAbsent(key, () => []);
+      for (var c in value) {
         l.add(c);
       }
-    }
+    });
   }
 
   /// The default, sealed [SnapshotDecoder]
@@ -129,7 +129,7 @@ class SnapshotDecoder {
   ///
   /// Throws a [StateError] when not sealed.
   /// Throws a [FormatException] when no applicable converter registered.
-  T convert<T>(Snapshot input, {String format}) {
+  T /*!*/ convert<T>(Snapshot input, {String format}) {
     if (!isSealed) {
       throw StateError('Cannot be used when not sealed.');
     }
@@ -146,7 +146,7 @@ class SnapshotDecoder {
 }
 
 class _SnapshotDecoderFactory<S, T> {
-  final T Function(S, String) converter;
+  final T Function(S /*!*/, String) converter;
   final Pattern format;
 
   _SnapshotDecoderFactory(this.converter, this.format);

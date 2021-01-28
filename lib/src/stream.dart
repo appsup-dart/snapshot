@@ -37,15 +37,25 @@ extension SnapshotStreamX on Stream<Snapshot> {
   /// Returns a stream where each snapshot is converted to an object of type T.
   Stream<T> as<T>({String format}) => map((s) => s.as<T>(format: format));
 
-  /// Returns a stream where each snapshot is converted to a list of objects of
-  /// type T.
-  Stream<List<T>> asList<T>({String format}) =>
+  /// Returns a stream where each snapshot is converted to a nullable list of
+  /// objects of type T.
+  Stream<List<T>> /*?*/ asList<T>({String format}) =>
       map((s) => s.asList<T>(format: format));
 
-  /// Returns a stream where each snapshot is converted to a map with values of
-  /// type T.
+  /// Returns a stream where each snapshot is converted to a non-nullable list
+  /// of objects of type T.
+  Stream<List<T>> /*!*/ asNonNullableList<T>({String format}) =>
+      map((s) => s.asNonNullableList<T>(format: format));
+
+  /// Returns a stream where each snapshot is converted to a nullable map with
+  /// values of type T.
   Stream<Map<String, T>> asMap<T>({String format}) =>
       map((s) => s.asMap<T>(format: format));
+
+  /// Returns a stream where each snapshot is converted to a non-nullable map
+  /// with values of type T.
+  Stream<Map<String, T>> asNonNullableMap<T>({String format}) =>
+      map((s) => s.asNonNullableMap<T>(format: format));
 
   /// Updates the content at [path] for each snapshot in this stream.
   Stream<Snapshot> setPath(String path, dynamic value) =>

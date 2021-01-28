@@ -18,7 +18,7 @@ import 'package:snapshot/snapshot.dart';
 ///
 ///
 mixin SnapshotView {
-  Snapshot get _snapshot;
+  Snapshot /*!*/ get _snapshot;
 
   /// Returns the JSON representation of the snapshot
   ///
@@ -38,13 +38,21 @@ extension SnapshotViewExtension on SnapshotView {
   T get<T>(String path, {String format}) =>
       _snapshot.child(path).as(format: format);
 
-  /// Gets and converts the value at [path] to type List<T>
-  List<T> getList<T>(String path, {String format}) =>
+  /// Gets and converts the value at [path] to type List<T> or null
+  List<T> /*?*/ getList<T>(String path, {String format}) =>
       _snapshot.child(path).asList(format: format);
 
-  /// Gets and converts the value at [path] to type Map<String,T>
+  /// Gets and converts the value at [path] to type List<T>
+  List<T> /*!*/ getNonNullableList<T>(String path, {String format}) =>
+      _snapshot.child(path).asNonNullableList(format: format);
+
+  /// Gets and converts the value at [path] to type Map<String,T> or null
   Map<String, T> getMap<T>(String path, {String format}) =>
       _snapshot.child(path).asMap(format: format);
+
+  /// Gets and converts the value at [path] to type Map<String,T>
+  Map<String, T> getNonNullableMap<T>(String path, {String format}) =>
+      _snapshot.child(path).asNonNullableMap(format: format);
 }
 
 /// Base class for unmodifiable data classes
@@ -130,7 +138,13 @@ class ModifiableSnapshotView with SnapshotView {
   }
 
   @override
-  Snapshot get _snapshot => _snapshots.value;
+  Snapshot /*!*/ get _snapshot {
+    var v = _snapshots.value;
+    if (v == null) {
+      throw StateError('ModifiableSnapshotView has not received a value yet.');
+    }
+    return v;
+  }
 
   bool get isDisposed => _isDisposed;
   bool _isDisposed = false;
@@ -164,6 +178,8 @@ extension ModifiableSnapshotViewX on ModifiableSnapshotView {
           return event;
         });
       }, reusable: true);
+
+  bool get hasValue => _snapshots.hasValue;
 }
 
 class SnapshotViewChangeEvent {

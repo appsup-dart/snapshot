@@ -84,23 +84,49 @@ abstract class Snapshot implements DeepImmutable {
   ///
   /// The result of the conversion is cached, so that subsequent calls to [as]
   /// with the same type parameter and [format], returns the exact same object.
-  T as<T>({String format});
+  T /*!*/ as<T>({String format});
 
-  /// Returns the content of this snapshot as a list of objects of type T.
+  /// Returns the content of this snapshot as a non-nullable list of objects of
+  /// type T.
   ///
   /// The content should be a list and the items of the list should be
   /// convertible to objects of type T.
   ///
   /// The returned list is cached and unmodifiable.
-  List<T> asList<T>({String format});
+  List<T> /*!*/ asNonNullableList<T>({String format}) {
+    if (value == null) throw TypeError();
+    return asList(format: format);
+  }
 
-  /// Returns the content of this snapshot as a map with value objects of type T.
+  /// Returns the content of this snapshot as a nullable list of objects of type
+  /// T.
+  ///
+  /// The content should be a list or null and the items of the list should be
+  /// convertible to objects of type T.
+  ///
+  /// The returned list is cached and unmodifiable.
+  List<T> /*?*/ asList<T>({String format});
+
+  /// Returns the content of this snapshot as a non-nullable map with value
+  /// objects of type T.
   ///
   /// The content should be a map and the value items of the map should be
   /// convertible to objects of type T.
   ///
   /// The returned map is cached and unmodifiable.
-  Map<String, T> asMap<T>({String format});
+  Map<String, T> /*!*/ asNonNullableMap<T>({String format}) {
+    if (value == null) throw TypeError();
+    return asMap(format: format);
+  }
+
+  /// Returns the content of this snapshot as a nullable map with value objects
+  /// of type T.
+  ///
+  /// The content should be a map or null and the value items of the map should
+  /// be convertible to objects of type T.
+  ///
+  /// The returned map is cached and unmodifiable.
+  Map<String, T> /*?*/ asMap<T>({String format});
 
   /// Returns a snapshot with updated content.
   ///
@@ -232,11 +258,14 @@ class _SnapshotImpl extends Snapshot {
   final Map<String, Snapshot> _childrenCache = {};
 
   @override
-  T as<T>({String format}) {
-    return _fromCache(format, () => decoder.convert<T>(this, format: format));
+  T /*!*/ as<T>({String format}) {
+    return _fromCache<T /*?*/ >(
+        format, () => decoder.convert<T>(this, format: format)) /*as T*/;
   }
 
-  T _fromCache<T>(String format, T Function() ifAbsent) {
+  T /*?*/ _fromCache<T>(String format, T Function() ifAbsent) {
+    /* assert(null is T,
+        '_fromCache should be called with nullable type parameters, was called with $T instead'); */
     if (value == null) return null;
     if (value is T) return value;
     return _decodingCache
@@ -246,7 +275,7 @@ class _SnapshotImpl extends Snapshot {
 
   @override
   List<T> asList<T>({String format}) => _fromCache(format, () {
-        if (value is! List) throw FormatException();
+        if (value is! List) throw TypeError();
         var length = (value as List).length;
         return List<T>.unmodifiable(List<T>.generate(
             length, (index) => child('$index').as<T>(format: format)));
@@ -254,14 +283,15 @@ class _SnapshotImpl extends Snapshot {
 
   @override
   Map<String, T> asMap<T>({String format}) => _fromCache(format, () {
-        if (value is! Map) throw FormatException();
+        if (value is! Map) throw TypeError();
 
         return Map<String, T>.unmodifiable(Map<String, T>.fromIterable(
             (value as Map).keys,
             value: (k) => child(k).as<T>(format: format)));
       });
 
-  Snapshot _directChild(String child) => _childrenCache.putIfAbsent(child, () {
+  Snapshot /*!*/ _directChild(String child) =>
+      _childrenCache.putIfAbsent(child, () {
         var v;
         if (value is Map) {
           v = value[child];

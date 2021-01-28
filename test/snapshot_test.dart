@@ -105,6 +105,21 @@ void main() {
             decoder: decoderWithAddress);
         expect(s.as<Address>().street, 'Mainstreet');
       });
+
+      test('Should return null when content is null and type is nullable', () {
+        var s = Snapshot.fromJson(null);
+
+        expect(s.as<String /*?*/ >(), null);
+        expect(s.as<dynamic>(), null);
+      });
+
+      test(
+          'Should return same instance when requesting nullable or non-nullable',
+          () {
+        var s = Snapshot.fromJson({'street': 'Mainstreet'},
+            decoder: decoderWithAddress);
+        expect(s.as<Address>(), same(s.as<Address /*?*/ >()));
+      });
     });
 
     group('Snapshot.asList()', () {
@@ -137,6 +152,24 @@ void main() {
         // this should update the first two elements in cache and remove the other two
         v.set(['5', '6']);
       });
+
+      test('Should return null when content is null', () {
+        var v = Snapshot.fromJson(null);
+        expect(v.asList(), null);
+      });
+    });
+
+    group('Snapshot.asNonNullableList()', () {
+      test('Should throw when null', () {
+        var v = Snapshot.fromJson(null);
+        expect(v.asNonNullableList, throwsA(isA<TypeError>()));
+      });
+      test('Should be identical to result of asMap', () {
+        var v = Snapshot.fromJson([
+          {'firstname': 'Jane'}
+        ]);
+        expect(v.asNonNullableList(), same(v.asList()));
+      });
     });
 
     group('Snapshot.asMap()', () {
@@ -163,8 +196,23 @@ void main() {
         v = Snapshot.fromJson({'url': 'https://google.com'});
         expect(v.asMap<Uri>()['url'], same(v.child('url').as<Uri>()));
       });
+
+      test('Should return null when content is null', () {
+        var v = Snapshot.fromJson(null);
+        expect(v.asMap(), null);
+      });
     });
 
+    group('Snapshot.asNonNullableMap()', () {
+      test('Should throw when null', () {
+        var v = Snapshot.fromJson(null);
+        expect(v.asNonNullableMap, throwsA(isA<TypeError>()));
+      });
+      test('Should be identical to result of asMap', () {
+        var v = Snapshot.fromJson({'firstname': 'Jane'});
+        expect(v.asNonNullableMap(), same(v.asMap()));
+      });
+    });
     group('Snapshot.set()', () {
       var v = Snapshot.fromJson({
         'firstname': 'Jane',
@@ -392,7 +440,7 @@ void main() {
             () =>
                 v.register<String, DateTime>((_) => DateTime.now(), format: ''),
             isNot(throwsA(anything)));
-        expect(() => v.convert(null), throwsStateError);
+        expect(() => v.convert(Snapshot.empty()), throwsStateError);
       });
       test('Should disallow register/allow usage when sealed', () {
         var v = SnapshotDecoder()..seal();
@@ -408,7 +456,7 @@ void main() {
       });
       test('Should try converters in reversed order', () {
         var v = SnapshotDecoder.empty()
-          ..register<String, DateTime>((String v, {String format}) {
+          ..register<String, DateTime>((String v, {String /*?*/ format}) {
             var f = DateFormat(format);
             return f.parse(v);
           }, format: RegExp('.*'))
@@ -434,7 +482,7 @@ void main() {
             throwsFormatException);
 
         v = SnapshotDecoder.from(v)
-          ..register<String, DateTime>((String v, {String format}) {
+          ..register<String, DateTime>((String v, {String /*?*/ format}) {
             var f = DateFormat(format);
             return f.parse(v);
           }, format: RegExp('.*'))
