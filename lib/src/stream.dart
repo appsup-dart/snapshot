@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:json_patch/json_patch.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:snapshot/snapshot.dart';
+
+import 'json_pointer.dart';
 
 extension StreamX on Stream<dynamic> {
   /// Transforms this stream to a stream of [Snapshot]s with the specified

@@ -5,10 +5,10 @@ library snapshot;
 
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
-import 'package:json_patch/json_patch.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/core.dart';
 import 'package:snapshot/src/deep_immutable.dart';
+import 'package:snapshot/src/json_pointer.dart';
 
 export 'src/snapshot_view.dart';
 export 'src/stream.dart';
