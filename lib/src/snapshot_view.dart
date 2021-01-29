@@ -18,7 +18,7 @@ import 'package:snapshot/snapshot.dart';
 ///
 ///
 mixin SnapshotView {
-  Snapshot /*!*/ get _snapshot;
+  Snapshot get _snapshot;
 
   /// Returns the JSON representation of the snapshot
   ///
@@ -35,23 +35,23 @@ extension SnapshotViewExtension on SnapshotView {
   Snapshot get snapshot => _snapshot;
 
   /// Gets and converts the value at [path] to type T
-  T get<T>(String path, {String format}) =>
+  T get<T>(String path, {String? format}) =>
       _snapshot.child(path).as(format: format);
 
   /// Gets and converts the value at [path] to type List<T> or null
-  List<T> /*?*/ getList<T>(String path, {String format}) =>
+  List<T>? getList<T>(String path, {String? format}) =>
       _snapshot.child(path).asList(format: format);
 
   /// Gets and converts the value at [path] to type List<T>
-  List<T> /*!*/ getNonNullableList<T>(String path, {String format}) =>
+  List<T> getNonNullableList<T>(String path, {String? format}) =>
       _snapshot.child(path).asNonNullableList(format: format);
 
   /// Gets and converts the value at [path] to type Map<String,T> or null
-  Map<String, T> getMap<T>(String path, {String format}) =>
+  Map<String, T>? getMap<T>(String path, {String? format}) =>
       _snapshot.child(path).asMap(format: format);
 
   /// Gets and converts the value at [path] to type Map<String,T>
-  Map<String, T> getNonNullableMap<T>(String path, {String format}) =>
+  Map<String, T> getNonNullableMap<T>(String path, {String? format}) =>
       _snapshot.child(path).asNonNullableMap(format: format);
 }
 
@@ -73,7 +73,7 @@ class UnmodifiableSnapshotView with SnapshotView {
 
   UnmodifiableSnapshotView(this._snapshot);
 
-  UnmodifiableSnapshotView.fromJson(dynamic json, {SnapshotDecoder decoder})
+  UnmodifiableSnapshotView.fromJson(dynamic json, {SnapshotDecoder? decoder})
       : this(Snapshot.empty(decoder: decoder).set(json));
 }
 
@@ -112,23 +112,23 @@ class UnmodifiableSnapshotView with SnapshotView {
 class ModifiableSnapshotView with SnapshotView {
   final BehaviorSubject<Snapshot> _snapshots = BehaviorSubject();
 
-  ModifiableSnapshotView.fromJson(dynamic json, {SnapshotDecoder decoder}) {
+  ModifiableSnapshotView.fromJson(dynamic json, {SnapshotDecoder? decoder}) {
     _snapshots.add(Snapshot.empty(decoder: decoder).set(json));
   }
 
   ModifiableSnapshotView.fromStream(Stream<Snapshot> stream) {
-    StreamSubscription subscription;
+    StreamSubscription? subscription;
     _snapshots.onListen = () {
       subscription ??= stream.listen(_snapshots.add,
           onError: _snapshots.addError, onDone: _snapshots.close);
-      subscription.resume();
+      subscription!.resume();
     };
     _snapshots.onCancel = () {
       if (stream.isBroadcast) {
-        subscription.cancel();
+        subscription!.cancel();
         subscription = null;
       } else {
-        subscription.pause();
+        subscription!.pause();
       }
     };
     _snapshots.done.then((v) {
@@ -138,7 +138,7 @@ class ModifiableSnapshotView with SnapshotView {
   }
 
   @override
-  Snapshot /*!*/ get _snapshot {
+  Snapshot get _snapshot {
     var v = _snapshots.value;
     if (v == null) {
       throw StateError('ModifiableSnapshotView has not received a value yet.');
@@ -171,7 +171,7 @@ extension ModifiableSnapshotViewX on ModifiableSnapshotView {
   }
 
   Stream<SnapshotViewChangeEvent> get onChanged => DeferStream(() {
-        Snapshot last;
+        Snapshot? last;
         return _snapshots.stream.map((v) {
           var event = SnapshotViewChangeEvent(oldValue: last, newValue: v);
           last = v;
@@ -183,9 +183,9 @@ extension ModifiableSnapshotViewX on ModifiableSnapshotView {
 }
 
 class SnapshotViewChangeEvent {
-  final Snapshot oldValue;
+  final Snapshot? oldValue;
 
-  final Snapshot newValue;
+  final Snapshot? newValue;
 
   SnapshotViewChangeEvent({this.oldValue, this.newValue});
 }

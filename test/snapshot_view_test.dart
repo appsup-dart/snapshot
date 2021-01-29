@@ -200,17 +200,17 @@ void main() {
 }
 
 mixin AddressMixin on SnapshotView {
-  String /*?*/ get addressLine1 => get('addressLine1');
+  String? get addressLine1 => get('addressLine1');
 
-  String /*?*/ get city => get('city');
+  String? get city => get('city');
 }
 
 class Address = UnmodifiableSnapshotView with AddressMixin;
 
 mixin ModifiableAddressMixin on ModifiableSnapshotView {
-  set addressLine1(String /*?*/ v) => set('addressLine1', v);
+  set addressLine1(String? v) => set('addressLine1', v);
 
-  set city(String /*?*/ v) => set('city', v);
+  set city(String? v) => set('city', v);
 }
 
 class ModifiableAddress = ModifiableSnapshotView

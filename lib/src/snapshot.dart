@@ -13,13 +13,13 @@ abstract class Snapshot implements DeepImmutable {
   /// The decoder that will be used to decode content
   final SnapshotDecoder decoder;
 
-  Snapshot._({SnapshotDecoder decoder})
+  Snapshot._({SnapshotDecoder? decoder})
       : decoder = decoder ?? SnapshotDecoder.defaultDecoder;
 
   /// Creates an empty snapshot with the specified decoder
   ///
   /// When [decoder] is null, the [SnapshotDecoder.defaultDecoder] will be used
-  factory Snapshot.empty({SnapshotDecoder decoder}) =>
+  factory Snapshot.empty({SnapshotDecoder? decoder}) =>
       Snapshot.fromJson(null, decoder: decoder);
 
   /// Creates a snapshot from the JSON-like [content]
@@ -28,7 +28,7 @@ abstract class Snapshot implements DeepImmutable {
   /// deep immutability of a snapshot is guaranteed.
   ///
   /// When [decoder] is null, the [SnapshotDecoder.defaultDecoder] will be used
-  factory Snapshot.fromJson(dynamic content, {SnapshotDecoder decoder}) =>
+  factory Snapshot.fromJson(dynamic content, {SnapshotDecoder? decoder}) =>
       _SnapshotImpl(content, decoder: decoder);
 
   /// The [Snapshot] that represents a (grand)child of this Snapshot.
@@ -84,7 +84,7 @@ abstract class Snapshot implements DeepImmutable {
   ///
   /// The result of the conversion is cached, so that subsequent calls to [as]
   /// with the same type parameter and [format], returns the exact same object.
-  T /*!*/ as<T>({String format});
+  T as<T>({String? format});
 
   /// Returns the content of this snapshot as a non-nullable list of objects of
   /// type T.
@@ -93,9 +93,9 @@ abstract class Snapshot implements DeepImmutable {
   /// convertible to objects of type T.
   ///
   /// The returned list is cached and unmodifiable.
-  List<T> /*!*/ asNonNullableList<T>({String format}) {
+  List<T> asNonNullableList<T>({String? format}) {
     if (value == null) throw TypeError();
-    return asList(format: format);
+    return asList(format: format) as List<T>;
   }
 
   /// Returns the content of this snapshot as a nullable list of objects of type
@@ -105,7 +105,7 @@ abstract class Snapshot implements DeepImmutable {
   /// convertible to objects of type T.
   ///
   /// The returned list is cached and unmodifiable.
-  List<T> /*?*/ asList<T>({String format});
+  List<T>? asList<T>({String? format});
 
   /// Returns the content of this snapshot as a non-nullable map with value
   /// objects of type T.
@@ -114,9 +114,9 @@ abstract class Snapshot implements DeepImmutable {
   /// convertible to objects of type T.
   ///
   /// The returned map is cached and unmodifiable.
-  Map<String, T> /*!*/ asNonNullableMap<T>({String format}) {
+  Map<String, T> asNonNullableMap<T>({String? format}) {
     if (value == null) throw TypeError();
-    return asMap(format: format);
+    return asMap(format: format) as Map<String, T>;
   }
 
   /// Returns the content of this snapshot as a nullable map with value objects
@@ -126,7 +126,7 @@ abstract class Snapshot implements DeepImmutable {
   /// be convertible to objects of type T.
   ///
   /// The returned map is cached and unmodifiable.
-  Map<String, T> /*?*/ asMap<T>({String format});
+  Map<String, T>? asMap<T>({String? format});
 
   /// Returns a snapshot with updated content.
   ///
@@ -250,23 +250,22 @@ class _SnapshotImpl extends Snapshot {
   @override
   final dynamic value;
 
-  _SnapshotImpl(dynamic value, {SnapshotDecoder decoder})
+  _SnapshotImpl(dynamic value, {SnapshotDecoder? decoder})
       : value = toDeepImmutable(value),
         super._(decoder: decoder);
 
-  final Map<Type, Map<String, dynamic>> _decodingCache = {};
-  final Map<String, Snapshot> _childrenCache = {};
+  final Map<Type?, Map<String?, dynamic>> _decodingCache = {};
+  final Map<String?, Snapshot?> _childrenCache = {};
 
   @override
-  T /*!*/ as<T>({String format}) {
-    return _fromCache<T /*?*/ >(
-        format, () => decoder.convert<T>(this, format: format)) /*as T*/;
+  T as<T>({String? format}) {
+    return _fromCache<T?>(
+        format, () => decoder.convert<T>(this, format: format)) as T;
   }
 
-  T /*?*/ _fromCache<T>(String format, T Function() ifAbsent) {
-    /* assert(null is T,
-        '_fromCache should be called with nullable type parameters, was called with $T instead'); */
-    if (value == null) return null;
+  T _fromCache<T>(String? format, T Function() ifAbsent) {
+    assert(null is T,
+        '_fromCache should be called with nullable type parameters, was called with $T instead');
     if (value is T) return value;
     return _decodingCache
         .putIfAbsent(T, () => {})
@@ -274,7 +273,7 @@ class _SnapshotImpl extends Snapshot {
   }
 
   @override
-  List<T> asList<T>({String format}) => _fromCache(format, () {
+  List<T>? asList<T>({String? format}) => _fromCache(format, () {
         if (value is! List) throw TypeError();
         var length = (value as List).length;
         return List<T>.unmodifiable(List<T>.generate(
@@ -282,7 +281,7 @@ class _SnapshotImpl extends Snapshot {
       });
 
   @override
-  Map<String, T> asMap<T>({String format}) => _fromCache(format, () {
+  Map<String, T>? asMap<T>({String? format}) => _fromCache(format, () {
         if (value is! Map) throw TypeError();
 
         return Map<String, T>.unmodifiable(Map<String, T>.fromIterable(
@@ -290,8 +289,7 @@ class _SnapshotImpl extends Snapshot {
             value: (k) => child(k).as<T>(format: format)));
       });
 
-  Snapshot /*!*/ _directChild(String child) =>
-      _childrenCache.putIfAbsent(child, () {
+  Snapshot _directChild(String child) => _childrenCache.putIfAbsent(child, () {
         var v;
         if (value is Map) {
           v = value[child];
@@ -302,15 +300,15 @@ class _SnapshotImpl extends Snapshot {
           }
         }
         return _SnapshotImpl(v, decoder: decoder);
-      });
+      })!;
 
   @override
   Snapshot child(String path) {
     var pointer =
         JsonPointer.fromString(path.startsWith('/') ? path : '/$path');
-    var v = this;
+    _SnapshotImpl v = this;
     for (var c in pointer.segments) {
-      v = v._directChild(c);
+      v = v._directChild(c) as _SnapshotImpl;
     }
     return v;
   }
@@ -326,14 +324,14 @@ class _SnapshotImpl extends Snapshot {
         for (var k in newValue._childrenCache.keys) {
           if (_childrenCache.containsKey(k)) {
             _childrenCache[k] =
-                _childrenCache[k].set(newValue._childrenCache[k]);
+                _childrenCache[k]!.set(newValue._childrenCache[k]);
           } else {
             _childrenCache[k] = newValue._childrenCache[k];
           }
         }
 
         for (var t in newValue._decodingCache.keys) {
-          for (var f in newValue._decodingCache[t].keys) {
+          for (var f in newValue._decodingCache[t]!.keys) {
             _decodingCache
                 .putIfAbsent(t, () => {})
                 .putIfAbsent(f, () => newValue._decodingCache[t][f]);
@@ -346,10 +344,10 @@ class _SnapshotImpl extends Snapshot {
         for (var k in _childrenCache.keys) {
           if (newValue._childrenCache.containsKey(k)) {
             newValue._childrenCache[k] =
-                _childrenCache[k].set(newValue._childrenCache[k]);
+                _childrenCache[k]!.set(newValue._childrenCache[k]);
           } else {
             newValue._childrenCache[k] =
-                _childrenCache[k].set(newValue._directChild(k));
+                _childrenCache[k]!.set(newValue._directChild(k!));
           }
         }
 
@@ -366,13 +364,13 @@ class _SnapshotImpl extends Snapshot {
     if (newValue is Map && value is Map) {
       _childrenCache.forEach((k, child) {
         if (newValue[k] == null) return;
-        v._childrenCache[k] = child.set(newValue[k]);
+        v._childrenCache[k] = child!.set(newValue[k]);
       });
     } else if (newValue is List && value is List) {
       _childrenCache.forEach((k, child) {
-        var index = int.parse(k);
+        var index = int.parse(k!);
         if (index >= newValue.length) return;
-        v._childrenCache[k] = child.set(newValue[index]);
+        v._childrenCache[k] = child!.set(newValue[index]);
       });
     }
     return v;

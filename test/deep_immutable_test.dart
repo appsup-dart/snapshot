@@ -69,7 +69,7 @@ class MyUri extends DelegatesTo<Uri> implements Uri {
   String get authority => delegateTo.authority;
 
   @override
-  UriData get data => delegateTo.data;
+  UriData? get data => delegateTo.data;
 
   @override
   String get fragment => delegateTo.fragment;
@@ -131,15 +131,15 @@ class MyUri extends DelegatesTo<Uri> implements Uri {
 
   @override
   Uri replace(
-          {String scheme,
-          String userInfo,
-          String host,
-          int port,
-          String path,
-          Iterable<String> pathSegments,
-          String query,
-          Map<String, dynamic> queryParameters,
-          String fragment}) =>
+          {String? scheme,
+          String? userInfo,
+          String? host,
+          int? port,
+          String? path,
+          Iterable<String>? pathSegments,
+          String? query,
+          Map<String, dynamic>? queryParameters,
+          String? fragment}) =>
       delegateTo.replace(
           scheme: scheme,
           userInfo: userInfo,
@@ -167,7 +167,7 @@ class MyUri extends DelegatesTo<Uri> implements Uri {
   String get scheme => delegateTo.scheme;
 
   @override
-  String toFilePath({bool windows}) => delegateTo.toFilePath(windows: windows);
+  String toFilePath({bool? windows}) => delegateTo.toFilePath(windows: windows);
 }
 
 class MyRegExp extends DelegatesTo<RegExp> implements RegExp {
@@ -178,7 +178,7 @@ class MyRegExp extends DelegatesTo<RegExp> implements RegExp {
       delegateTo.allMatches(input, start);
 
   @override
-  RegExpMatch firstMatch(String input) => delegateTo.firstMatch(input);
+  RegExpMatch? firstMatch(String input) => delegateTo.firstMatch(input);
 
   @override
   bool hasMatch(String input) => delegateTo.hasMatch(input);
@@ -196,11 +196,11 @@ class MyRegExp extends DelegatesTo<RegExp> implements RegExp {
   bool get isUnicode => delegateTo.isUnicode;
 
   @override
-  Match matchAsPrefix(String input, [int start = 0]) =>
+  Match? matchAsPrefix(String input, [int start = 0]) =>
       delegateTo.matchAsPrefix(input, start);
 
   @override
-  String stringMatch(String input) => delegateTo.stringMatch(input);
+  String? stringMatch(String input) => delegateTo.stringMatch(input);
 
   @override
   String get pattern => delegateTo.pattern;

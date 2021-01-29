@@ -41,14 +41,14 @@ class SnapshotDecoder {
         format: 'epoch');
     register<String, Uri>((v) => Uri.parse(v));
     register<String, int>(
-        (v, {String /*?*/ format}) =>
-            int.parse(v, radix: int.parse(format.substring('radix:'.length))),
+        (v, {String? format}) =>
+            int.parse(v, radix: int.parse(format!.substring('radix:'.length))),
         format: RegExp(r'radix:(\d+)'));
     register<String, int>((v) => int.parse(v), format: 'string');
     register<String, double>((v) => double.parse(v), format: 'string');
     register<String, num>((v) => num.parse(v), format: 'string');
-    register<String, DateTime>((v, {String /*?*/ format}) {
-      var f = DateFormat(format);
+    register<String, DateTime>((v, {String? format}) {
+      var f = DateFormat(format!);
       return f.parse(v);
     }, format: RegExp('.*'));
   }
@@ -111,14 +111,14 @@ class SnapshotDecoder {
   /// Converters are applied in reverse order of how they were registered. So,
   /// you can (partly) overwrite an already registered converter, by registering
   /// a new one.
-  void register<S, T>(T Function(S) converter, {Pattern format}) {
+  void register<S, T>(T Function(S) converter, {Pattern? format}) {
     if (isSealed) {
       throw StateError('Cannot register new conversion methods when sealed.');
     }
     _converters
         .putIfAbsent(T, () => [])
         .add(_SnapshotDecoderFactory<S, T>((s, format) {
-          if (converter is T Function(S, {String format})) {
+          if (converter is T Function(S, {String? format})) {
             return converter(s, format: format);
           }
           return converter(s);
@@ -129,7 +129,7 @@ class SnapshotDecoder {
   ///
   /// Throws a [StateError] when not sealed.
   /// Throws a [FormatException] when no applicable converter registered.
-  T /*!*/ convert<T>(Snapshot input, {String format}) {
+  T convert<T>(Snapshot input, {String? format}) {
     if (!isSealed) {
       throw StateError('Cannot be used when not sealed.');
     }
@@ -146,27 +146,27 @@ class SnapshotDecoder {
 }
 
 class _SnapshotDecoderFactory<S, T> {
-  final T Function(S /*!*/, String) converter;
-  final Pattern format;
+  final T Function(S, String?) converter;
+  final Pattern? format;
 
   _SnapshotDecoderFactory(this.converter, this.format);
 
-  bool canHandle(Snapshot v, String format) {
+  bool canHandle(Snapshot v, String? format) {
     var input = v.value;
     if (input is! S && S != Snapshot) return false;
     if (!_canHandleFormat(format)) return false;
     return true;
   }
 
-  bool _canHandleFormat(String format) {
+  bool _canHandleFormat(String? format) {
     if (this.format == null) return format == null;
     if (format == null) return false;
-    var matches = this.format.allMatches(format);
+    var matches = this.format!.allMatches(format);
     return matches.isNotEmpty &&
         matches.any((element) => element.group(0) == format);
   }
 
-  T create(Snapshot source, String format) {
-    return converter(S == Snapshot ? source : source.value, format);
+  T create(Snapshot source, String? format) {
+    return converter(S == Snapshot ? source as S : source.value, format);
   }
 }

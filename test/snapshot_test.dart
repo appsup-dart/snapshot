@@ -109,7 +109,7 @@ void main() {
       test('Should return null when content is null and type is nullable', () {
         var s = Snapshot.fromJson(null);
 
-        expect(s.as<String /*?*/ >(), null);
+        expect(s.as<String? >(), null);
         expect(s.as<dynamic>(), null);
       });
 
@@ -118,7 +118,7 @@ void main() {
           () {
         var s = Snapshot.fromJson({'street': 'Mainstreet'},
             decoder: decoderWithAddress);
-        expect(s.as<Address>(), same(s.as<Address /*?*/ >()));
+        expect(s.as<Address>(), same(s.as<Address? >()));
       });
     });
 
@@ -129,8 +129,8 @@ void main() {
         var l = v.asList<int>(format: 'string');
         expect(l, isA<List<int>>());
         expect(l, [1, 2, 3, 4]);
-        expect(() => l.removeLast(), throwsUnsupportedError);
-        expect(() => l[2] = 0, throwsUnsupportedError);
+        expect(() => l!.removeLast(), throwsUnsupportedError);
+        expect(() => l![2] = 0, throwsUnsupportedError);
 
         v = Snapshot.fromJson(['1.1', '2', '3', '4']);
 
@@ -142,7 +142,7 @@ void main() {
         expect(l, same(v.asList<int>(format: 'string')));
 
         v = Snapshot.fromJson(['https://google.com']);
-        expect(v.asList<Uri>()[0], same(v.child('0').as<Uri>()));
+        expect(v.asList<Uri>()![0], same(v.child('0').as<Uri>()));
       });
       test('Should update cache correctly', () {
         var v = Snapshot.fromJson(['1', '2', '3', '4']);
@@ -180,8 +180,8 @@ void main() {
         var l = v.asMap<int>(format: 'string');
         expect(l, isA<Map<String, int>>());
         expect(l, {'first': 1, 'second': 2, 'third': 3, 'fourth': 4});
-        expect(() => l.remove('first'), throwsUnsupportedError);
-        expect(() => l['second'] = 0, throwsUnsupportedError);
+        expect(() => l!.remove('first'), throwsUnsupportedError);
+        expect(() => l!['second'] = 0, throwsUnsupportedError);
 
         v = Snapshot.fromJson({'first': '1.1', 'second': '2'});
 
@@ -194,7 +194,7 @@ void main() {
         expect(l, same(v.asMap<int>(format: 'string')));
 
         v = Snapshot.fromJson({'url': 'https://google.com'});
-        expect(v.asMap<Uri>()['url'], same(v.child('url').as<Uri>()));
+        expect(v.asMap<Uri>()!['url'], same(v.child('url').as<Uri>()));
       });
 
       test('Should return null when content is null', () {
@@ -456,8 +456,8 @@ void main() {
       });
       test('Should try converters in reversed order', () {
         var v = SnapshotDecoder.empty()
-          ..register<String, DateTime>((String v, {String /*?*/ format}) {
-            var f = DateFormat(format);
+          ..register<String, DateTime>((String v, {String? format}) {
+            var f = DateFormat(format!);
             return f.parse(v);
           }, format: RegExp('.*'))
           ..register<String, DateTime>((String v) => DateTime.parse(v),
@@ -482,8 +482,8 @@ void main() {
             throwsFormatException);
 
         v = SnapshotDecoder.from(v)
-          ..register<String, DateTime>((String v, {String /*?*/ format}) {
-            var f = DateFormat(format);
+          ..register<String, DateTime>((String v, {String? format}) {
+            var f = DateFormat(format!);
             return f.parse(v);
           }, format: RegExp('.*'))
           ..seal();

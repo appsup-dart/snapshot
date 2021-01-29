@@ -26,7 +26,7 @@ import 'package:meta/meta.dart';
 /// Additionally, all classes that implement [DeepImmutable] are also considered
 /// as deep immutable.
 dynamic toDeepImmutable(dynamic input,
-    {bool Function(dynamic) isDeepImmutable}) {
+    {bool Function(dynamic)? isDeepImmutable}) {
   if (input == null ||
       input is num ||
       input is bool ||
@@ -82,7 +82,7 @@ dynamic toDeepImmutable(dynamic input,
     return _DeepImmutableSet(input.cast(), isDeepImmutable: isDeepImmutable);
   }
   if (input is Iterable) {
-    return _DeepImmutableList(input.cast(), isDeepImmutable: isDeepImmutable);
+    return _DeepImmutableList(input.cast() as List<dynamic>, isDeepImmutable: isDeepImmutable);
   }
   if (input is Map) {
     return _DeepImmutableMap(input.cast(), isDeepImmutable: isDeepImmutable);
@@ -108,7 +108,7 @@ abstract class DeepImmutable {}
 class _DeepImmutableMap extends UnmodifiableMapView<String, dynamic>
     implements DeepImmutable {
   _DeepImmutableMap(Map<String, dynamic> map,
-      {bool Function(dynamic) isDeepImmutable})
+      {bool Function(dynamic)? isDeepImmutable})
       : super(Map<String, dynamic>.unmodifiable(map.map((k, v) =>
             MapEntry<String, dynamic>(
                 k, toDeepImmutable(v, isDeepImmutable: isDeepImmutable)))));
@@ -117,7 +117,7 @@ class _DeepImmutableMap extends UnmodifiableMapView<String, dynamic>
 class _DeepImmutableList extends UnmodifiableListView<dynamic>
     implements DeepImmutable {
   _DeepImmutableList(List<dynamic> source,
-      {bool Function(dynamic) isDeepImmutable})
+      {bool Function(dynamic)? isDeepImmutable})
       : super(List.unmodifiable(source
             .map((v) => toDeepImmutable(v, isDeepImmutable: isDeepImmutable))));
 }
@@ -125,7 +125,7 @@ class _DeepImmutableList extends UnmodifiableListView<dynamic>
 class _DeepImmutableSet extends UnmodifiableSetView<dynamic>
     implements DeepImmutable {
   _DeepImmutableSet(Set<dynamic> source,
-      {bool Function(dynamic) isDeepImmutable})
+      {bool Function(dynamic)? isDeepImmutable})
       : super(Set.from(source
             .map((v) => toDeepImmutable(v, isDeepImmutable: isDeepImmutable))));
 }
