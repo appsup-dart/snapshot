@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:intl/intl.dart';
 import 'package:snapshot/snapshot.dart';
 import 'package:test/test.dart';
@@ -109,7 +111,7 @@ void main() {
       test('Should return null when content is null and type is nullable', () {
         var s = Snapshot.fromJson(null);
 
-        expect(s.as<String? >(), null);
+        expect(s.as<String?>(), null);
         expect(s.as<dynamic>(), null);
       });
 
@@ -118,7 +120,7 @@ void main() {
           () {
         var s = Snapshot.fromJson({'street': 'Mainstreet'},
             decoder: decoderWithAddress);
-        expect(s.as<Address>(), same(s.as<Address? >()));
+        expect(s.as<Address>(), same(s.as<Address?>()));
       });
     });
 
@@ -362,6 +364,16 @@ void main() {
             () => persons.setPath('john-doe/firstname', 'John',
                 createParents: false),
             throwsArgumentError);
+      });
+
+      test('Setting a null value', () {
+        var person = Snapshot.empty()
+            .setPath('firstname', 'Jane')
+            .setPath('address', null)
+            .setPath('lastname', 'Doe');
+
+        expect(person.value,
+            {'firstname': 'Jane', 'address': null, 'lastname': 'Doe'});
       });
     });
 

@@ -82,7 +82,8 @@ dynamic toDeepImmutable(dynamic input,
     return _DeepImmutableSet(input.cast(), isDeepImmutable: isDeepImmutable);
   }
   if (input is Iterable) {
-    return _DeepImmutableList(input.cast() as List<dynamic>, isDeepImmutable: isDeepImmutable);
+    return _DeepImmutableList(input.cast() as List<dynamic>,
+        isDeepImmutable: isDeepImmutable);
   }
   if (input is Map) {
     return _DeepImmutableMap(input.cast(), isDeepImmutable: isDeepImmutable);
@@ -109,8 +110,9 @@ class _DeepImmutableMap extends UnmodifiableMapView<String, dynamic>
     implements DeepImmutable {
   _DeepImmutableMap(Map<String, dynamic> map,
       {bool Function(dynamic)? isDeepImmutable})
-      : super(Map<String, dynamic>.unmodifiable(map.map((k, v) =>
-            MapEntry<String, dynamic>(
+      : super(Map<String,
+                dynamic>.from /*.unmodifiable instead of .from causes an error in web environment: see https://github.com/dart-lang/sdk/issues/46417 */
+            (map.map((k, v) => MapEntry<String, dynamic>(
                 k, toDeepImmutable(v, isDeepImmutable: isDeepImmutable)))));
 }
 
