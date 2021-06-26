@@ -139,7 +139,7 @@ class ModifiableSnapshotView with SnapshotView {
 
   @override
   Snapshot get _snapshot {
-    var v = _snapshots.value;
+    var v = _snapshots.valueOrNull;
     if (v == null) {
       throw StateError('ModifiableSnapshotView has not received a value yet.');
     }
