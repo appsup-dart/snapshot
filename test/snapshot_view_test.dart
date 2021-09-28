@@ -54,6 +54,26 @@ void main() {
         expect(address.city, 'London');
         expect(address.addressLine1, 'Mainstreet 1');
       });
+
+      test('Should convert to nullable types', () {
+        var decoder = SnapshotDecoder()
+          ..register<Map<String, dynamic>, Address>((v) => Address.fromJson(v))
+          ..seal();
+        SnapshotView v = UnmodifiableSnapshotView.fromJson({
+          'firstname': 'Jane',
+          'lastname': 'Doe',
+          'pictureUrl': 'https://my.avatar.com/jane-doe',
+          'address': {'addressLine1': 'Mainstreet 1', 'city': 'London'}
+        }, decoder: decoder);
+
+        expect(v.get<Uri?>('pictureUrl'),
+            Uri.parse('https://my.avatar.com/jane-doe'));
+
+        var address = v.get<Address?>('address');
+        expect(address!, isA<Address>());
+        expect(address.city, 'London');
+        expect(address.addressLine1, 'Mainstreet 1');
+      });
     });
 
     group('SnapshotView.set()', () {

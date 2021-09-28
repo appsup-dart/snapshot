@@ -99,7 +99,8 @@ extension SnapshotStreamX on Stream<Snapshot> {
   Stream<Snapshot> mapChildren(
           dynamic Function(String key, Snapshot value) mapper) =>
       map((s) {
-        var keys = s.as<Map<String, dynamic>>().keys;
+        var keys = s.asMap()?.keys;
+        if (keys == null) return s;
         return keys.fold(s, (s, k) => s.setPath(k, mapper(k, s.child(k))));
       });
 

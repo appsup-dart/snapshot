@@ -1,4 +1,8 @@
 
+# 0.2.3
+
+- fix converting to nullable type
+
 ## 0.2.2
 
 - Upgrade to rxdart 0.27.0

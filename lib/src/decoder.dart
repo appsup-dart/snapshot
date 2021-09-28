@@ -115,15 +115,20 @@ class SnapshotDecoder {
     if (isSealed) {
       throw StateError('Cannot register new conversion methods when sealed.');
     }
-    _converters
-        .putIfAbsent(T, () => [])
-        .add(_SnapshotDecoderFactory<S, T>((s, format) {
-          if (converter is T Function(S, {String? format})) {
-            return converter(s, format: format);
-          }
-          return converter(s);
-        }, format));
+    _addConverter(_SnapshotDecoderFactory<S, T?>((s, format) {
+      if (s == null) return null;
+      if (converter is T Function(S, {String? format})) {
+        return converter(s, format: format);
+      }
+      return converter(s);
+    }, format));
   }
+
+  void _addConverter<S, T>(_SnapshotDecoderFactory<S, T> factory) {
+    _converters.putIfAbsent(T, () => []).add(factory);
+  }
+
+  List<_SnapshotDecoderFactory> _getConverters<T>() => _converters[T] ?? [];
 
   /// Converts [input] to an object of type T
   ///
@@ -135,7 +140,7 @@ class SnapshotDecoder {
     }
     var value = input.value;
     if (value is T) return value;
-    var factories = _converters[T] ?? [];
+    var factories = _getConverters<T?>();
     for (var factory in factories.reversed) {
       if (factory.canHandle(input, format)) {
         return factory.create(input, format);

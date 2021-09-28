@@ -120,7 +120,7 @@ void main() {
           () {
         var s = Snapshot.fromJson({'street': 'Mainstreet'},
             decoder: decoderWithAddress);
-        expect(s.as<Address>(), same(s.as<Address?>()));
+        expect(s.as<Address?>(), same(s.as<Address>()));
       });
     });
 
