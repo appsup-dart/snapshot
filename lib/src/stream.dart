@@ -39,7 +39,7 @@ extension SnapshotStreamX on Stream<Snapshot> {
 
   /// Returns a stream where each snapshot is converted to a nullable list of
   /// objects of type T.
-  Stream<List<T>?>? asList<T>({String? format}) =>
+  Stream<List<T>?> asList<T>({String? format}) =>
       map((s) => s.asList<T>(format: format));
 
   /// Returns a stream where each snapshot is converted to a non-nullable list

@@ -1,4 +1,8 @@
 
+# 0.2.4
+
+- fix signature `asList` on `Stream<Snapshot>`
+
 # 0.2.3
 
 - fix converting to nullable type
