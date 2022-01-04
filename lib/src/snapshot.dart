@@ -306,7 +306,7 @@ class _SnapshotImpl extends Snapshot {
   Snapshot child(String path) {
     var pointer =
         JsonPointer.fromString(path.startsWith('/') ? path : '/$path');
-    _SnapshotImpl v = this;
+    var v = this;
     for (var c in pointer.segments) {
       v = v._directChild(c) as _SnapshotImpl;
     }

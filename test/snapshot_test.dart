@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:intl/intl.dart';
 import 'package:snapshot/snapshot.dart';
 import 'package:test/test.dart';

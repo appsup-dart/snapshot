@@ -1,7 +1,7 @@
 class JsonPointer {
   final List<String> segments;
 
-  JsonPointer.fromSegments(this.segments) : assert(segments != null);
+  JsonPointer.fromSegments(this.segments);
 
   factory JsonPointer.fromString(String pointer) {
     if (!(pointer.isEmpty || pointer.startsWith('/'))) {

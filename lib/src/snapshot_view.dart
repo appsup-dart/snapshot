@@ -162,7 +162,7 @@ extension ModifiableSnapshotViewX on ModifiableSnapshotView {
   ///
   /// To use this method, the [ModifiableSnapshotView.fromJson] constructor
   /// should have been used.
-  void set(String path, dynamic value) {
+  void set(String? path, dynamic value) {
     if (path == null) {
       _snapshots.add(_snapshot.set(value));
     } else {

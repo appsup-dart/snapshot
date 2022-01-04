@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:snapshot/src/deep_immutable.dart';
 import 'package:test/test.dart';
 

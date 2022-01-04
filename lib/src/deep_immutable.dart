@@ -1,6 +1,5 @@
 library deep_immutable;
 
-import 'dart:collection';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
