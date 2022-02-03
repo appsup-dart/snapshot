@@ -95,7 +95,7 @@ abstract class Snapshot implements DeepImmutable {
   /// The returned list is cached and unmodifiable.
   List<T> asNonNullableList<T>({String? format}) {
     if (value == null) throw TypeError();
-    return asList(format: format) as List<T>;
+    return asList<T>(format: format)!;
   }
 
   /// Returns the content of this snapshot as a nullable list of objects of type
