@@ -243,6 +243,15 @@ void main() async {
         expect((await stream.first).as(),
             {'jane': 'Jane Doe', 'john': 'John Doe'});
       });
+
+      test('with empty map', () async {
+        var stream = Stream<Snapshot>.value(Snapshot.fromJson({}));
+
+        stream = stream.switchChildren((key, value) => Stream.value(
+            '${value.child('firstname').as()} ${value.child('lastname').as()}'));
+
+        expect((await stream.first).as(), {});
+      });
     });
     group('Stream<Snapshot>.recycle', () {
       test('Stream<Snapshot>.recycle', () async {

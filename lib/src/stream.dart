@@ -116,7 +116,7 @@ extension SnapshotStreamX on Stream<Snapshot> {
           Stream<dynamic> Function(String key, Snapshot value) mapper) =>
       switchMap((s) {
         var keys = s.asMap()?.keys;
-        if (keys == null) return Stream.value(s);
+        if (keys == null || keys.isEmpty) return Stream.value(s);
         return CombineLatestStream(
             keys.map((k) => mapper(k, s.child(k)).map((v) => MapEntry(k, v))),
             (List<MapEntry<String, dynamic>> l) {
