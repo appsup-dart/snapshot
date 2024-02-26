@@ -1,4 +1,8 @@
 
+# 0.2.6
+
+- Fixes switchChildren not emitting any value when empty map
+
 # 0.2.5
 
 - fix `Snapshot.asNonNullableList`
