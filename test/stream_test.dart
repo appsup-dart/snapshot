@@ -89,7 +89,7 @@ void main() async {
           ['https://avatars.com/john-doe.png'],
         ]).toSnapshots();
 
-        var l = await stream.asList<Uri>()!.toList();
+        var l = await stream.asList<Uri>().toList();
 
         expect(l, [
           [Uri.parse('https://avatars.com/jane-doe.png')],
