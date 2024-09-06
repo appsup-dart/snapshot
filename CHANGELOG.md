@@ -1,3 +1,9 @@
+## 0.2.6+1
+
+ - **REFACTOR**: support for rxdart ^0.28.0.
+ - **REFACTOR**: support for intl ^0.19.0.
+ - **FIX**: switchChildren not emitting any value when empty map.
+
 
 # 0.2.6
 
