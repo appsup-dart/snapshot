@@ -65,7 +65,7 @@ abstract class Snapshot implements DeepImmutable {
   /// The raw content of this snapshot
   ///
   /// This value is deep immutable
-  dynamic get value;
+  dynamic /*Immutable*/ get value;
 
   /// Returns the content of this snapshot as an object of type T.
   ///
@@ -234,7 +234,7 @@ abstract class Snapshot implements DeepImmutable {
   String toString() => 'Snapshot[${as()}]';
 
   @override
-  int get hashCode => hash2(decoder, DeepCollectionEquality().hash(as()));
+  int get hashCode => hash2(decoder, value);
 
   @override
   bool operator ==(Object other) {
@@ -242,13 +242,13 @@ abstract class Snapshot implements DeepImmutable {
 
     return other is Snapshot &&
         other.decoder == decoder &&
-        DeepCollectionEquality().equals(other.as(), as());
+        other.value == value;
   }
 }
 
 class _SnapshotImpl extends Snapshot {
   @override
-  final dynamic value;
+  final dynamic /*Immutable*/ value;
 
   _SnapshotImpl(dynamic value, {SnapshotDecoder? decoder})
       : value = toDeepImmutable(value),
@@ -266,7 +266,7 @@ class _SnapshotImpl extends Snapshot {
   T _fromCache<T>(String? format, T Function() ifAbsent) {
     assert(null is T,
         '_fromCache should be called with nullable type parameters, was called with $T instead');
-    if (value is T) return value;
+    if (value is T) return value as T;
     return _decodingCache
         .putIfAbsent(T, () => {})
         .putIfAbsent(format, ifAbsent);
@@ -292,11 +292,11 @@ class _SnapshotImpl extends Snapshot {
   Snapshot _directChild(String child) => _childrenCache.putIfAbsent(child, () {
         var v;
         if (value is Map) {
-          v = value[child];
+          v = (value as Map)[child];
         } else if (value is List) {
           var index = int.tryParse(child);
-          if (index != null && index >= 0 && index < value.length) {
-            v = value[index];
+          if (index != null && index >= 0 && index < (value as List).length) {
+            v = (value as List)[index];
           }
         }
         return _SnapshotImpl(v, decoder: decoder);
@@ -318,7 +318,7 @@ class _SnapshotImpl extends Snapshot {
     if (newValue is _SnapshotImpl && decoder == newValue.decoder) {
       // the new value is a snapshot
 
-      if (DeepCollectionEquality().equals(value, newValue.value)) {
+      if (value == newValue.value) {
         // content is identical: return this with cache from newValue
 
         for (var k in newValue._childrenCache.keys) {
@@ -332,9 +332,8 @@ class _SnapshotImpl extends Snapshot {
 
         for (var t in newValue._decodingCache.keys) {
           for (var f in newValue._decodingCache[t]!.keys) {
-            _decodingCache
-                .putIfAbsent(t, () => {})
-                .putIfAbsent(f, () => newValue._decodingCache[t][f]);
+            _decodingCache.putIfAbsent(t, () => {}).putIfAbsent(
+                f, () => (newValue as _SnapshotImpl)._decodingCache[t]![f]);
           }
         }
         return this;
@@ -375,4 +374,10 @@ class _SnapshotImpl extends Snapshot {
     }
     return v;
   }
+
+  @override
+  bool operator ==(Object other) => super == other;
+
+  @override
+  late final int hashCode = super.hashCode;
 }

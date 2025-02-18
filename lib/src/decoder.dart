@@ -172,6 +172,6 @@ class _SnapshotDecoderFactory<S, T> {
   }
 
   T create(Snapshot source, String? format) {
-    return converter(S == Snapshot ? source as S : source.value, format);
+    return converter(S == Snapshot ? source as S : source.value as S, format);
   }
 }
