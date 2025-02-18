@@ -1,3 +1,32 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## 2025-02-18
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`snapshot` - `v0.2.6+2`](#snapshot---v0262)
+
+---
+
+#### `snapshot` - `v0.2.6+2`
+
+ - **PERF**: improve speed of equality checks on deep immutables.
+
+## 0.2.6+2
+
+ - **PERF**: improve speed of equality checks on deep immutables.
+
 ## 0.2.6+1
 
  - **REFACTOR**: support for rxdart ^0.28.0.
