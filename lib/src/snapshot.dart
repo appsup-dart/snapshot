@@ -250,9 +250,9 @@ class _SnapshotImpl extends Snapshot {
   @override
   final dynamic /*Immutable*/ value;
 
-  _SnapshotImpl(dynamic value, {SnapshotDecoder? decoder})
+  _SnapshotImpl(dynamic value, {super.decoder})
       : value = toDeepImmutable(value),
-        super._(decoder: decoder);
+        super._();
 
   final Map<Type?, Map<String?, dynamic>> _decodingCache = {};
   final Map<String?, Snapshot?> _childrenCache = {};

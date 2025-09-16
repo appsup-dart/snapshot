@@ -1,4 +1,4 @@
-library deep_immutable;
+library;
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';

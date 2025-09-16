@@ -68,7 +68,7 @@ abstract class DelegatesTo<T> {
 }
 
 class MyUri extends DelegatesTo<Uri> implements Uri {
-  MyUri(Uri delegateTo) : super(delegateTo);
+  MyUri(super.delegateTo);
 
   @override
   String toString() => delegateTo.toString();

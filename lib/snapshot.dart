@@ -1,7 +1,7 @@
 /// A library that can be used to implement data classes
 ///
 ///
-library snapshot;
+library;
 
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';

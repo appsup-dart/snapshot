@@ -1,4 +1,4 @@
-library snapshot.view;
+library;
 
 import 'dart:async';
 

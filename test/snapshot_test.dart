@@ -520,7 +520,7 @@ void main() {
 }
 
 class Address extends UnmodifiableSnapshotView {
-  Address(Snapshot snapshot) : super(snapshot);
+  Address(super.snapshot);
 
   String get street => get('street');
   String get city => get('city');
