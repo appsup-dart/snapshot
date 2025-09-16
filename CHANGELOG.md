@@ -1,54 +1,9 @@
-# Change Log
-
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
-
-## 2025-09-16
-
-### Changes
-
----
-
-Packages with breaking changes:
-
- - There are no breaking changes in this release.
-
-Packages with other changes:
-
- - [`snapshot` - `v0.2.6+3`](#snapshot---v0263)
-
----
-
-#### `snapshot` - `v0.2.6+3`
-
- - **REFACTOR**: set min sdk to 3.0.0. ([2c4a0e3d](https://github.com/appsup-dart/snapshot/commit/2c4a0e3d12e0e0e801bdab652388ab041ed604e2))
- - **REFACTOR**: support for intl ^0.20.0. ([a7854b1b](https://github.com/appsup-dart/snapshot/commit/a7854b1b04dc7c85d094456b8b802ec886245562))
 
 ## 0.2.6+3
 
  - **REFACTOR**: set min sdk to 3.0.0. ([2c4a0e3d](https://github.com/appsup-dart/snapshot/commit/2c4a0e3d12e0e0e801bdab652388ab041ed604e2))
  - **REFACTOR**: support for intl ^0.20.0. ([a7854b1b](https://github.com/appsup-dart/snapshot/commit/a7854b1b04dc7c85d094456b8b802ec886245562))
 
-
-## 2025-02-18
-
-### Changes
-
----
-
-Packages with breaking changes:
-
- - There are no breaking changes in this release.
-
-Packages with other changes:
-
- - [`snapshot` - `v0.2.6+2`](#snapshot---v0262)
-
----
-
-#### `snapshot` - `v0.2.6+2`
-
- - **PERF**: improve speed of equality checks on deep immutables.
 
 ## 0.2.6+2
 
