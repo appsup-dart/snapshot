@@ -1,3 +1,7 @@
+[![Ceasefire Now](https://badge.techforpalestine.org/default)](https://techforpalestine.org/learn-more)
+
+[:heart: sponsor](https://github.com/sponsors/rbellens)
+
 A library that can be used to implement data classes
 
 A `Snapshot` simplifies accessing and converting properties in a JSON-like 
