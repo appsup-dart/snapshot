@@ -1,4 +1,4 @@
-part of snapshot;
+part of '../snapshot.dart';
 
 /// A Snapshot holds immutable data that represents part of the content of a
 /// (remote) database at some moment.
@@ -290,7 +290,7 @@ class _SnapshotImpl extends Snapshot {
       });
 
   Snapshot _directChild(String child) => _childrenCache.putIfAbsent(child, () {
-        var v;
+        dynamic v;
         if (value is Map) {
           v = (value as Map)[child];
         } else if (value is List) {
@@ -376,6 +376,7 @@ class _SnapshotImpl extends Snapshot {
   }
 
   @override
+  // ignore: unnecessary_overrides
   bool operator ==(Object other) => super == other;
 
   @override

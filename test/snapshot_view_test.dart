@@ -151,7 +151,7 @@ void main() {
         expect(listenCalled, false);
 
         // listening on onChanged should trigger listen on controller
-        var s = view.onChanged.listen((_) => null);
+        var s = view.onChanged.listen((_) {});
         expect(view.hasValue, false);
         expect(listenCalled, true);
 
@@ -168,7 +168,7 @@ void main() {
 
         // listening again should trigger resume on controller
         expect(resumeCalled, false);
-        s = view.onChanged.listen((_) => null);
+        s = view.onChanged.listen((_) {});
         expect(resumeCalled, true);
 
         // disposing the snapshot view should cancel the controller
@@ -190,7 +190,7 @@ void main() {
         expect(listenCalled, false);
 
         // listening on onChanged should trigger listen on controller
-        var s = view.onChanged.listen((_) => null);
+        var s = view.onChanged.listen((_) {});
         expect(view.hasValue, false);
         expect(listenCalled, true);
 
@@ -207,7 +207,7 @@ void main() {
 
         // listening again should trigger listen on controller
         listenCalled = false;
-        s = view.onChanged.listen((_) => null);
+        s = view.onChanged.listen((_) {});
         expect(listenCalled, true);
 
         // disposing the snapshot view should cancel the controller

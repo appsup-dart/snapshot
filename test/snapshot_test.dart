@@ -403,35 +403,35 @@ void main() {
     });
     group('Snapshot.operator==', () {
       test('Snapshots are equal when same decoder and content', () {
-        void _checkEquality(v) {
+        void checkEquality(v) {
           var s1 = Snapshot.fromJson(v);
           var s2 = Snapshot.fromJson(v);
 
           expect(s1, s2);
         }
 
-        _checkEquality('hello world');
-        _checkEquality(3.1);
-        _checkEquality(true);
-        _checkEquality({'hello': 'world'});
-        _checkEquality([
+        checkEquality('hello world');
+        checkEquality(3.1);
+        checkEquality(true);
+        checkEquality({'hello': 'world'});
+        checkEquality([
           3.1,
           {true}
         ]);
       });
       test('Snapshots are not equal when different decoder', () {
-        void _checkInequality(v) {
+        void checkInequality(v) {
           var s1 = Snapshot.fromJson(v, decoder: SnapshotDecoder.empty());
           var s2 = Snapshot.fromJson(v);
 
           expect(s1, isNot(s2));
         }
 
-        _checkInequality('hello world');
-        _checkInequality(3.1);
-        _checkInequality(true);
-        _checkInequality({'hello': 'world'});
-        _checkInequality([
+        checkInequality('hello world');
+        checkInequality(3.1);
+        checkInequality(true);
+        checkInequality({'hello': 'world'});
+        checkInequality([
           3.1,
           {true}
         ]);

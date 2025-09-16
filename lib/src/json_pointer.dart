@@ -36,7 +36,7 @@ class JsonPointer {
         .map((String segment) => segment
             .replaceAll(RegExp(r'~'), '~0')
             .replaceAll(RegExp(r'/'), '~1'))
-        .map((String segment) => '/' + segment)
+        .map((String segment) => '/$segment')
         .join();
   }
 }

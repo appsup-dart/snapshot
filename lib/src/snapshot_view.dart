@@ -38,19 +38,19 @@ extension SnapshotViewExtension on SnapshotView {
   T get<T>(String path, {String? format}) =>
       _snapshot.child(path).as(format: format);
 
-  /// Gets and converts the value at [path] to type List<T> or null
+  /// Gets and converts the value at [path] to type List&lt;T&gt; or null
   List<T>? getList<T>(String path, {String? format}) =>
       _snapshot.child(path).asList(format: format);
 
-  /// Gets and converts the value at [path] to type List<T>
+  /// Gets and converts the value at [path] to type List&lt;T&gt;
   List<T> getNonNullableList<T>(String path, {String? format}) =>
       _snapshot.child(path).asNonNullableList(format: format);
 
-  /// Gets and converts the value at [path] to type Map<String,T> or null
+  /// Gets and converts the value at [path] to type Map&lt;String,T&gt; or null
   Map<String, T>? getMap<T>(String path, {String? format}) =>
       _snapshot.child(path).asMap(format: format);
 
-  /// Gets and converts the value at [path] to type Map<String,T>
+  /// Gets and converts the value at [path] to type Map&lt;String,T&gt;
   Map<String, T> getNonNullableMap<T>(String path, {String? format}) =>
       _snapshot.child(path).asNonNullableMap(format: format);
 }

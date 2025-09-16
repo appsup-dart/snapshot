@@ -117,9 +117,11 @@ dynamic /*Immutable*/ toDeepImmutable(dynamic input,
 /// by the developer.
 @immutable
 abstract class DeepImmutable {
+  @override
   @mustBeOverridden
   int get hashCode;
 
+  @override
   @mustBeOverridden
   bool operator ==(Object other);
 }

@@ -1,4 +1,4 @@
-part of snapshot;
+part of '../snapshot.dart';
 
 /// Holds methods to convert [Snapshot]s to objects of specific types.
 ///
